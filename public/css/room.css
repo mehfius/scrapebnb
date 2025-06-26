@@ -126,18 +126,26 @@ dialog > content > div > badges > * {
 dialog > content > div > calendar {
     width: 100%;
     margin-top: 24px;
-    border: 1px solid #ccc;
-    padding: 16px;
-    border-radius: 8px;
+    /* Removed border */
+    /* Removed padding */
+    /* Removed border-radius */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between month calendars */
 }
 
 dialog > content > div > calendar h2 {
     font-size: 20px;
     margin-bottom: 16px;
+    width: 100%; /* Ensure h2 takes full width */
 }
 
 dialog > content > div > calendar .month-container {
-    margin-bottom: 20px;
+    flex: 0 0 calc(33.33% - 14px); /* Roughly 3 months per row with gap */
+    margin-bottom: 0; /* Remove vertical margin as gap handles it */
+    /* Removed border */
+    border-radius: 8px;
+    overflow: hidden; /* Hide overflow for rounded corners */
 }
 
 dialog > content > div > calendar .month-header {

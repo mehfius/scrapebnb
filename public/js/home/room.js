@@ -18,7 +18,7 @@
 
         try {
             const r = await fetch(
-                `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=*&id=eq.${itemId}`,
+                `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost,room,job&id=eq.${itemId}`,
                 { headers: { Apikey: globalThis.auth.SUPABASE_ANON_KEY, "Content-Type": "application/json" } }
             );
 
@@ -44,6 +44,7 @@
                     badges.appendChild(jte({ tag: 'favorite', innerhtml: 'favorite', class: icon }));
                 }
                 div.appendChild(badges);
+
                 
 
                 if (item.room_image_array && item.room_image_array.length > 0) {
@@ -87,7 +88,60 @@
 
                 
 
-                
+                // Second query for next 60 days
+                const today = new Date();
+                const sixtyDaysFromNow = new Date(today);
+                sixtyDaysFromNow.setDate(today.getDate() + 59); // +59 to include today and next 59 days
+
+                const todayFormatted = today.toISOString().split('T')[0];
+                const sixtyDaysFromNowFormatted = sixtyDaysFromNow.toISOString().split('T')[0];
+
+                const allNext60Days = [];
+                for (let i = 0; i < 60; i++) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() + i);
+                    allNext60Days.push(date);
+                }
+
+                const r2 = await fetch(
+                    `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=checkin&room=eq.${item.room}&job=eq.${item.job}&checkin=gte.${todayFormatted}&checkin=lte.${sixtyDaysFromNowFormatted}`,
+                    { headers: { Apikey: globalThis.auth.SUPABASE_ANON_KEY, "Content-Type": "application/json" } }
+                );
+
+                if (r2.ok) {
+                    const availableDatesData = await r2.json();
+                    const availableDatesSet = new Set(availableDatesData.map(d => d.checkin));
+
+                    const calendarDiv = jte({ tag: 'calendar' });
+                    calendarDiv.appendChild(jte({ tag: 'h2', innerhtml: 'Available Dates:' }));
+
+                    let currentMonth = -1;
+                    let monthContainer;
+
+                    allNext60Days.forEach(date => {
+                        const month = date.getMonth();
+                        const year = date.getFullYear();
+
+                        if (month !== currentMonth) {
+                            currentMonth = month;
+                            monthContainer = jte({ tag: 'div', class: 'month-container' });
+                            monthContainer.appendChild(jte({ tag: 'div', class: 'month-header', innerhtml: `${date.toLocaleString('default', { month: 'long' })} ${year}` }));
+                            const daysGrid = jte({ tag: 'div', class: 'days-grid' });
+                            monthContainer.appendChild(daysGrid);
+                            calendarDiv.appendChild(monthContainer);
+                        }
+
+                        const dateString = date.toISOString().split('T')[0];
+                        const dayCell = jte({ tag: 'div', class: 'day-cell', innerhtml: date.getDate() });
+
+                        if (!availableDatesSet.has(dateString)) {
+                            dayCell.classList.add('unavailable-date');
+                        }
+                        monthContainer.querySelector('.days-grid').appendChild(dayCell);
+                    });
+
+                    div.appendChild(calendarDiv);
+                }
 
             } else {
                 div.appendChild(jte({ tag: 'p', innerhtml: "Nenhum detalhe encontrado para este ID." }));

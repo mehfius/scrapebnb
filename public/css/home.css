@@ -14,6 +14,10 @@ body>content>item {
 body>header{
     width: 100%;
 }
+body>header>select {
+    margin: 20px;
+    font-size: 100%;
+}
 body>header>input{
     float:right;
     font-size: 100%;

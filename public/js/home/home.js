@@ -26,6 +26,25 @@
 
     eHeader.appendChild(eCalendar);
     eHeader.appendChild(eJobSelect);
+
+    const viewJobButton = jte({ tag: 'button', innerhtml: 'Ver Anúncio' });
+    viewJobButton.onclick = () => {
+        const selectedJobId = eJobSelect.value;
+        const job = globalThis.jobs.find(j => j.id == selectedJobId);
+        if (job) {
+            const checkinDateString = eCalendar.value;
+            const checkinDate = new Date(checkinDateString);
+            const checkoutDate = new Date(checkinDate);
+            checkoutDate.setDate(checkinDate.getDate() + 3);
+            const checkoutDateString = checkoutDate.toISOString().split('T')[0];
+            const url = `${job.url}&adults=${job.adults}&min_bedrooms=${job.min_bedrooms}&check_in=${checkinDateString}&check_out=${checkoutDateString}${job.amenities && job.amenities.length > 0 ? job.amenities.map(amenity => `&amenities%5B%5D=${amenity}`).join('') : ''}${job.price_max ? `&price_max=${job.price_max}` : ''}`;
+            window.open(url, '_blank');
+        } else {
+            console.error('Job not found for selected ID:', selectedJobId);
+        }
+    };
+    eHeader.appendChild(viewJobButton);
+
     document.body.append(eHeader);
 
     let eContent = jte({
@@ -38,7 +57,7 @@
     const populateJobSelect = async () => {
         // MODIFIED: Added 'qtd' to the select query
         const r = await fetch(
-            `${globalThis.auth.SUPABASE_URL}/rest/v1/jobs?select=id,created_at,adults,min_bedrooms,qtd,url,amenities,created_at`, // <--- 'qtd' added here
+            `${globalThis.auth.SUPABASE_URL}/rest/v1/jobs?select=id,created_at,adults,min_bedrooms,qtd,url,amenities,price_max,created_at`, // <--- 'qtd' and 'price_max' added here
             { headers: { Apikey: globalThis.auth.SUPABASE_ANON_KEY, "Content-Type": "application/json" } }
         ).catch(console.error);
 
@@ -72,7 +91,7 @@
     const fetchDataForDate = async (checkinDate, jobId) => {
         eContent.innerHTML = '';
 
-        let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost&checkin=eq.${checkinDate}&limit=36`;
+        let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost&checkin=eq.${checkinDate}&limit=72`;
 
         if (jobId) {
             url += `&job=eq.${jobId}`;
@@ -104,7 +123,7 @@
                 eItem.addEventListener('click', () => {
                     globalThis.modal.id = item.id;
                     console.log('globalThis.modal.id set to:', globalThis.modal.id);
-                    speedj('js/home/room.js');
+                    speedj('/js/home/room.js');
                 });
             });
         } else {

@@ -38,11 +38,12 @@
     const populateJobSelect = async () => {
         // MODIFIED: Added 'qtd' to the select query
         const r = await fetch(
-            `${globalThis.auth.SUPABASE_URL}/rest/v1/jobs?select=id,created_at,adults,min_bedrooms,qtd`, // <--- 'qtd' added here
+            `${globalThis.auth.SUPABASE_URL}/rest/v1/jobs?select=id,created_at,adults,min_bedrooms,qtd,url,amenities,created_at`, // <--- 'qtd' added here
             { headers: { Apikey: globalThis.auth.SUPABASE_ANON_KEY, "Content-Type": "application/json" } }
         ).catch(console.error);
 
         const jobs = r ? await r.json() : [];
+        globalThis.jobs = jobs; // Store jobs in globalThis
 
         eJobSelect.innerHTML = '';
         let latestJobId = null;

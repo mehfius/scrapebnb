@@ -1,0 +1,122 @@
+dialog > content > div > h1 {
+    font-size: 24px;
+    font-weight: bold;
+    display: block;
+    padding: 0;
+    margin: 0;
+}
+
+dialog > content > div > tiny_description {
+    font-size: 16px;
+    font-weight: normal;
+    display: flex; /* Changed to flex */
+    align-items: center; /* Align items vertically */
+    margin-bottom: 0; /* Removed margin-bottom */
+}
+
+dialog > content > div > gallery {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    scrollbar-color: #444 #22222200;
+}
+
+dialog > content > div > gallery img {
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
+    margin-right: 16px;
+    border-radius: 8px;
+}
+
+dialog > content > div {
+    font-family: sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Changed to center for vertical alignment */
+    gap: 24px; /* Space between flex items */
+}
+
+dialog > content > div > h1,
+dialog > content > div > gallery,
+dialog > content > div > description {
+    width: 100%; /* Ensure these elements take full width */
+}
+
+dialog > content > div > host {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 10px 0 0;
+    background-color: #333;
+    border-radius: 16px;
+    color: #fff;
+    margin-right: 24px; /* Space after host */
+}
+
+dialog > content > div > host name {
+    font-size: 12px;
+    margin-top: 0;
+    margin-left: 12px; /* Adjusted space between image and name */
+}
+
+dialog > content > div > host img {
+    width: 32px; /* Slightly increased image size */
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+dialog > content > div > price {
+    background-color: #333;
+    padding: 8px 10px 8px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    color: #fff;
+}
+
+dialog > content > div > badges {
+    display: flex;
+    gap: 16px;
+    margin-top: 0;
+    margin-bottom: 0;
+    /* Removed margin-right */
+}
+
+dialog > content > div > badges > favorite {
+    color: red;
+}
+
+dialog > content > div > badges > superhost {
+    color: yellow;
+}
+
+dialog > content > div > badges > superhost::after {
+    content: "Superhost ";
+    color: #fff;
+    font-size: 10pt;
+    float: right;
+    padding: 6px;
+    font-family: sans-serif;
+}
+
+dialog > content > div > badges > favorite::after {
+    content: "Favorito ";
+    color: #fff;
+    font-size: 10pt;
+    float: right;
+    padding: 6px;
+    font-family: sans-serif;
+}
+
+dialog > content > div > badges > * {
+    background-color: #333;
+    padding: 5px;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    display: flex;
+    align-items: center;
+}
+

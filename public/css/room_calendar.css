@@ -1,0 +1,74 @@
+dialog > content > div > calendar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between month calendars */
+}
+
+dialog > content > div > calendar h2 {
+    font-size: 20px;
+    margin: 16px;
+    width: 100%; 
+    margin:0;
+}
+
+dialog > content > div > calendar .month-container {
+    flex: 0 0 calc(33.33% - 14px); /* Roughly 3 months per row with gap */
+    margin-bottom: 0; /* Remove vertical margin as gap handles it */
+    border-radius: 8px;
+    overflow: hidden; /* Hide overflow for rounded corners */
+}
+
+dialog > content > div > calendar .month-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    background-color: #222;
+    padding: 8px;
+    border-radius: 4px;
+    color: #fff;
+}
+
+dialog > content > div > calendar .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns for days of the week */
+    gap: 5px;
+    text-align: center;
+}
+
+dialog > content > div > calendar .day-cell {
+    border: 1px solid #444;
+    padding: 8px 0;
+    border-radius: 4px;
+    background-color: #333;
+    font-size: 14px;
+    color: #fff;
+}
+
+dialog > content > div > calendar .day-cell.unavailable-date {
+    opacity: 0.5;
+    background-color: #2a2a2a;
+    cursor: pointer;
+}
+
+dialog > content > div > calendar .day-cell.unavailable-date:hover {
+    background-color: #C2185B; /* Dark pink on hover */
+}
+
+dialog > content > div > calendar .day-cell.available {
+    background-color: #007bff; /* A distinct color for available dates */
+    color: #fff;
+    cursor: pointer;
+}
+
+dialog > content > div > calendar .day-cell.available:hover {
+    background-color: #C2185B; /* Dark pink on hover */
+}
+
+dialog > content > div > calendar .day-cell.empty {
+    background-color: #1a1a1a; /* Darker background for empty cells */
+    border: 1px dashed #555; /* Dashed border for empty cells */
+    opacity: 0.3; /* Slightly transparent */
+    padding: 8px 0; /* Add padding to empty cells */
+}

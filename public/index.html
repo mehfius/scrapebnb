@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraaperbnb</title>
+    
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon-192x192.png">
+    <meta name="theme-color" content="#317EFB" />
+    <script src="https://speedj.mehfi.us/src/speedj.js" data-production-domain="mehfi.us"></script>    
+    <script src="https://jte.mehfi.us/src/jte.js"></script>
+    <script src="https://navdialog.mehfi.us/src/navdialog.js"></script>
+    <link rel="stylesheet" href="https://ux.mehfi.us/ux.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        globalThis.auth = {}
+        globalThis.auth.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3ZWp6Z2x2cXNpeWR5Y3ZpdnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyNDgzOTQsImV4cCI6MjA1NzgyNDM5NH0.32ClzsWEgc_XdqXD4d8i7_AO4SOIjKjzQCPb_SjJBoU";
+        globalThis.auth.SUPABASE_URL = "https://xwejzglvqsiydycvivys.supabase.co/";
+
+        speedj('/css/home.css');
+
+/*                  if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        const swUrl = `/service-worker.js?v=${Date.now()}`;
+                        navigator.serviceWorker.register(swUrl)
+                            .then(registration => {
+                                console.log('Service Worker registrado com sucesso:', registration);
+                                registration.update();
+                            })
+                            .catch(error => {
+                                console.error('Falha ao registrar o Service Worker:', error);
+                            });
+                    });
+                } else {
+                    console.warn('Seu navegador não suporta Service Workers.');
+                }  */
+                speedj('/js/home/home.js');
+
+
+    </script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite,star" />
+    
+    <style>
+        :root {
+
+            --input-background: #3c3939;
+            --input-background-container: transparent;
+            --background: #181717;
+            --container-color-label: #aaa;
+            --container-color-item: #aaa;
+            --description-color: #000;
+
+            --dialog-button-color: #ffffff;
+            --dialog-button-background-color: #934545;
+            --dialog-button-border-color: #c3595e;
+            --dialog-background-color: #111111;
+            --dialog-border-color: #222222;
+
+            --aside-button-color: #ffffff;
+            --aside-button-background-color: #934545;
+            --aside-button-border-color: #c3595e;
+            --aside-background-color: #111111;
+            --aside-border-color: #222222;
+
+        }
+    </style>
+
+<body>
+</body>
+
+</html>

@@ -23,7 +23,12 @@
         tag: 'select',
         id: 'job-select'
     });
-
+    const eRooms = jte({
+        tag: 'rooms',
+        innerhtml: 'holiday_village',
+        class: 'material-symbols-outlined true'
+    });
+    eHeader.appendChild(eRooms);
     eHeader.appendChild(eCalendar);
     eHeader.appendChild(eJobSelect);
 
@@ -93,7 +98,7 @@
     const fetchDataForDate = async (checkinDate, jobId) => {
         eContent.innerHTML = '';
 
-        let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost&checkin=eq.${checkinDate}&limit=72&order=position`;
+        let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost,reference_label&checkin=eq.${checkinDate}&limit=72&order=position`;
 
         if (jobId) {
             url += `&job=eq.${jobId}`;
@@ -115,9 +120,11 @@
                 eContainer.appendChild(jte({ tag: 'figure', style: style }));
                 eContainer.appendChild(jte({ tag: 'position', innerhtml: item.position }));
                 eContainer.appendChild(jte({ tag: 'label', innerhtml: item.title }));
+                eContainer.appendChild(jte({ tag: 'reference', innerhtml: item.reference_label || '' }));
                 eContainer.appendChild(jte({ tag: 'favorite', innerhtml: 'favorite', class: icon + ' ' + item.favorite }));
                 eContainer.appendChild(jte({ tag: 'superhost', innerhtml: 'star', class: icon + ' ' + item.superhost }));
                 eContainer.appendChild(jte({ tag: 'price', innerhtml: 'R$ ' + item.price }));
+
 
                 eItem.appendChild(eContainer);
                 eContent.appendChild(eItem);

@@ -44,15 +44,23 @@ dialog > content > div > description {
 }
 
 dialog > content > div > host {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 0 10px 0 0;
-    background-color: #333;
-    border-radius: 16px;
-    color: #fff;
-    margin-right: 24px; /* Space after host */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 10px 0 0;
+  background-color: #333;
+  border-radius: 16px;
+  color: #fff;
+  box-shadow: 0 0 0 rgba(0, 255, 255, 0); /* Estado inicial sem sombra */
+  transition: box-shadow 0.6s ease-in-out; /* Transição para o box-shadow */
+  cursor:pointer;
 }
+
+dialog > content > div > host:hover {
+  background-color:var(--dialog-button-background-color);
+}
+
+
 
 dialog > content > div > host name {
     font-size: 12px;
@@ -68,11 +76,11 @@ dialog > content > div > host img {
 }
 
 dialog > content > div > price {
-    background-color: #333;
-    padding: 8px 10px 8px 10px;
-    border-radius: 16px;
-    font-size: 12px;
-    color: #fff;
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 7px 15px;
+    color: #000;
+    font-size: 80%;
 }
 
 dialog > content > div > badges {
@@ -100,12 +108,12 @@ dialog > content > div > badges > superhost::after {
     font-family: sans-serif;
 }
 
-dialog > content > div > badges > favorite::after {
+dialog>content>div>badges>favorite::after {
     content: "Favorito ";
     color: #fff;
     font-size: 10pt;
     float: right;
-    padding: 6px;
+    padding: 4px;
     font-family: sans-serif;
 }
 
@@ -120,3 +128,9 @@ dialog > content > div > badges > * {
     align-items: center;
 }
 
+dialog > content > div > select {
+    padding: 7px 15px;
+    border-radius: 15px;
+    font-size: 80%;
+    cursor: pointer;
+}

@@ -16,12 +16,18 @@ body>header{
 }
 body>header>select {
     margin: 20px;
-    font-size: 100%;
+    padding: 7px 15px;
+    border-radius: 15px;
+    font-size: 80%;
+    cursor: pointer;    
 }
 body>header>input{
     float:right;
-    font-size: 100%;
-    margin:20px;
+    margin: 20px;
+    padding: 7px 15px;
+    border-radius: 15px;
+    font-size: 80%;
+    cursor: pointer; 
 }
 body>content>item>container {
     display: flex;
@@ -64,6 +70,17 @@ body>content>item>container>price {
     color: var(--container-color-label);
     width: 80px;
     text-align: right;
+}
+body > content > item > container > reference:empty {
+  display: none; 
+}
+body>content>item>container>reference {
+    background-color: #d6a842;
+    text-align: center;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 100%;
+    color: #000;
 }
 body>content>item>container>favorite {
     letter-spacing: 1px;

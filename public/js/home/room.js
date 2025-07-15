@@ -7,7 +7,7 @@
     const dialog = navdialog.create_dialog(div, {});
     navdialog.show_dialog(dialog);
 
-    const icon = 'material-symbols-outlined';
+    const icon = 'material-icons';
 
     console.log('globalThis.jobs:', globalThis.jobs);
 

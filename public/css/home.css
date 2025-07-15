@@ -1,3 +1,30 @@
+body>header{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}body>header>*{
+    border-radius: 15px;
+    font-size: 80%;    
+    cursor: pointer;    
+}
+body>header>rooms{
+    background-color: #fff;
+    padding: 3px;  
+}
+body>header>airbnb{
+    background-color: #fff;
+
+    padding: 7px 15px;    
+}
+body>header>select {
+    padding: 7px 15px;
+}
+body>header>input{
+    margin-left: auto; /* Empurra este elemento para a direita */
+    padding: 7px 15px;
+}
 body>content {
     width: 100%;
     display: block;
@@ -10,24 +37,6 @@ body>content>item {
     width: 100%;
     margin-bottom: 1px;
     background-color: #000;
-}
-body>header{
-    width: 100%;
-}
-body>header>select {
-    margin: 20px;
-    padding: 7px 15px;
-    border-radius: 15px;
-    font-size: 80%;
-    cursor: pointer;    
-}
-body>header>input{
-    float:right;
-    margin: 20px;
-    padding: 7px 15px;
-    border-radius: 15px;
-    font-size: 80%;
-    cursor: pointer; 
 }
 body>content>item>container {
     display: flex;
@@ -72,7 +81,7 @@ body>content>item>container>price {
     text-align: right;
 }
 body > content > item > container > reference:empty {
-  display: none; 
+    display: none; 
 }
 body>content>item>container>reference {
     background-color: #d6a842;
@@ -94,16 +103,14 @@ body>content>item>container>superhost {
     color: var(--container-color-label);
     text-align: right;
 }
-.material-symbols-outlined.true{
+.material-icons.true{
     opacity:1;
 }
-.material-symbols-outlined {
-    opacity:0.5;
+.material-icons {
+    opacity:0.3;
     font-variation-settings:
     'FILL' 1,
     'wght' 100,
     'GRAD' 0,
     'opsz' 24
 }
-
-

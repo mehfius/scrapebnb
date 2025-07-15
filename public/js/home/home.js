@@ -26,14 +26,17 @@
     const eRooms = jte({
         tag: 'rooms',
         innerhtml: 'holiday_village',
-        class: 'material-symbols-outlined true'
+        class: 'material-icons true'
     });
-    eHeader.appendChild(eRooms);
-    eHeader.appendChild(eCalendar);
+    eRooms.addEventListener('click', () => {
+        speedj('/js/rooms/rooms.js');
+    });    
     eHeader.appendChild(eJobSelect);
-
-    const viewJobLink = jte({ tag: 'a', innerhtml: 'Ver Anúncio', target: '_blank' });
-    eHeader.appendChild(viewJobLink);
+    eHeader.appendChild(eRooms);
+    
+    const airbnb = jte({ tag: 'airbnb', innerhtml: 'Ver Anúncio no Airbnb' });
+    eHeader.appendChild(airbnb);
+    eHeader.appendChild(eCalendar);
 
     const updateViewJobLink = () => {
         const selectedJobId = eJobSelect.value;
@@ -45,12 +48,13 @@
             checkoutDate.setDate(checkinDate.getDate() + 3);
             const checkoutDateString = checkoutDate.toISOString().split('T')[0];
             const url = `${job.url}&adults=${job.adults}&min_bedrooms=${job.min_bedrooms}&check_in=${checkinDateString}&check_out=${checkoutDateString}${job.amenities && job.amenities.length > 0 ? job.amenities.map(amenity => `&amenities%5B%5D=${amenity}`).join('') : ''}${job.price_max ? `&price_max=${job.price_max}&price_filter_input_type=${job.price_filter_input_type}` : ''}`;
-            viewJobLink.href = url;
+            
+            airbnb.onclick = () => window.open(url, '_blank');
         } else {
             if (globalThis.jobs) {
                 console.error('Job not found for selected ID:', selectedJobId);
             }
-            viewJobLink.href = '#';
+            airbnb.onclick = () => false;
         }
     };
 
@@ -61,7 +65,7 @@
     });
     document.body.append(eContent);
 
-    const icon = 'material-symbols-outlined';
+    const icon = 'material-icons';
 
     const populateJobSelect = async () => {
         const r = await fetch(

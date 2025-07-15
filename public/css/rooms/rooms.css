@@ -1,0 +1,21 @@
+dialog > content > div > gallery {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    scrollbar-color: #444 #22222200;
+}
+
+dialog > content > div > gallery img {
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
+    margin-right: 16px;
+    border-radius: 8px;
+}
+
+dialog > content > div > select {
+    padding: 7px 15px;
+    border-radius: 15px;
+    font-size: 80%;
+    cursor: pointer;
+}

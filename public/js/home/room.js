@@ -167,7 +167,7 @@
                     const checkoutDate = new Date(checkinDate);
                             checkoutDate.setDate(checkinDate.getDate() + 3);
                     const checkoutDateString = checkoutDate.toISOString().split('T')[0];
-                    const url = `${job.url}&adults=${job.adults}&min_bedrooms=${job.min_bedrooms}&check_in=${checkinDateString}&check_out=${checkoutDateString}${job.amenities && job.amenities.length > 0 ? job.amenities.map(amenity => `&amenities%5B%5D=${amenity}`).join('') : ''}${job.price_max ? `&price_max=${job.price_max}&price_filter_input_type=${job.price_filter_input_type}` : ''}`;                    
+                    const url = `https://www.airbnb.com.br/s/${job.tag}/homes?adults=${job.adults}&min_bedrooms=${job.min_bedrooms}&check_in=${checkinDateString}&check_out=${checkoutDateString}${job.amenities && job.amenities.length > 0 ? job.amenities.map(amenity => `&amenities%5B%5D=${amenity}`).join('') : ''}${job.price_max ? `&price_max=${job.price_max}&price_filter_input_type=${job.price_filter_input_type}` : ''}`;                    
                     const viewJobLink = jte({ tag: 'a', innerhtml: 'Ver Anúncio', target: '_blank', href: url });
                     div.appendChild(viewJobLink);
                 } else {

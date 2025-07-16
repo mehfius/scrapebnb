@@ -31,12 +31,12 @@
     eRooms.addEventListener('click', () => {
         speedj('/js/rooms/rooms.js');
     });    
-    eHeader.appendChild(eJobSelect);
     eHeader.appendChild(eRooms);
     
     const airbnb = jte({ tag: 'airbnb', innerhtml: 'Ver Anúncio no Airbnb' });
     eHeader.appendChild(airbnb);
     eHeader.appendChild(eCalendar);
+    eHeader.appendChild(eJobSelect);
 
     const updateViewJobLink = () => {
         const selectedJobId = eJobSelect.value;
@@ -47,7 +47,7 @@
             const checkoutDate = new Date(checkinDate);
             checkoutDate.setDate(checkinDate.getDate() + 3);
             const checkoutDateString = checkoutDate.toISOString().split('T')[0];
-            const url = `${job.url}&adults=${job.adults}&min_bedrooms=${job.min_bedrooms}&check_in=${checkinDateString}&check_out=${checkoutDateString}${job.amenities && job.amenities.length > 0 ? job.amenities.map(amenity => `&amenities%5B%5D=${amenity}`).join('') : ''}${job.price_max ? `&price_max=${job.price_max}&price_filter_input_type=${job.price_filter_input_type}` : ''}`;
+            const url = `https://www.airbnb.com.br/s/${job.tag}/homes?adults=${job.adults}&min_bedrooms=${job.min_bedrooms}&check_in=${checkinDateString}&check_out=${checkoutDateString}${job.amenities && job.amenities.length > 0 ? job.amenities.map(amenity => `&amenities%5B%5D=${amenity}`).join('') : ''}${job.price_max ? `&price_max=${job.price_max}&price_filter_input_type=${job.price_filter_input_type}` : ''}`;
             
             airbnb.onclick = () => window.open(url, '_blank');
         } else {
@@ -69,7 +69,7 @@
 
     const populateJobSelect = async () => {
         const r = await fetch(
-            `${globalThis.auth.SUPABASE_URL}/rest/v1/jobs?select=id,created_at,adults,min_bedrooms,qtd,url,amenities,price_max,created_at,price_filter_input_type`,
+            `${globalThis.auth.SUPABASE_URL}/rest/v1/jobs?select=*`,
             { headers: { Apikey: globalThis.auth.SUPABASE_ANON_KEY, "Content-Type": "application/json" } }
         ).catch(console.error);
 
@@ -87,7 +87,7 @@
                 const option = jte({
                     tag: 'option',
                     value: job.id,
-                    innerhtml: `${new Date(job.created_at).toLocaleString()} | Adults: ${job.adults || 'N/A'} | Min Bedrooms: ${job.min_bedrooms || 'N/A'} | Qtd: ${job.qtd || 'N/A'}`
+                    innerhtml: `${job.label || 'N/A'} | Adultos: ${job.adults || 'N/A'} | Quartos: ${job.min_bedrooms || 'N/A'} `
                 });
                 eJobSelect.appendChild(option);
             });

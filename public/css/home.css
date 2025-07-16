@@ -4,25 +4,29 @@ body>header{
     align-items: center;
     gap: 20px;
     margin-bottom: 20px;
-}body>header>*{
+    /* Adicione estas duas propriedades para alinhar os itens no final (direita) */
+    justify-content: flex-end; /* Alinha os itens ao final do contêiner flex */
+    flex-wrap: wrap; /* Permite que os itens quebrem a linha se não houver espaço */
+}
+body>header>*{
     border-radius: 15px;
-    font-size: 80%;    
-    cursor: pointer;    
+    font-size: 80%;      
+    cursor: pointer; 
+    border: 0;        
+    font-family: "Segoe UI";
 }
 body>header>rooms{
     background-color: #fff;
-    padding: 3px;  
+    padding: 3px;   
 }
 body>header>airbnb{
     background-color: #fff;
-
-    padding: 7px 15px;    
+    padding: 7px 15px;      
 }
 body>header>select {
     padding: 7px 15px;
 }
 body>header>input{
-    margin-left: auto; /* Empurra este elemento para a direita */
     padding: 7px 15px;
 }
 body>content {

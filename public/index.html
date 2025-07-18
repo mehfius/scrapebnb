@@ -18,9 +18,10 @@
 
             --input-background: #3c3939;
             --input-background-container: transparent;
-            --background: #181717;
-            --container-color-label: #aaa;
-            --container-color-item: #aaa;
+            --background: #fff;
+            --content-color-item: #fff;            
+            --container-color-label: #000;
+            --container-color-item: #fff;
             --description-color: #000;
 
             --dialog-button-color: #ffffff;
@@ -37,6 +38,7 @@
 
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>    
     <script src="https://speedj.mehfi.us/src/speedj.js" data-production-domain="mehfi.us"></script>    
     <script src="https://jte.mehfi.us/src/jte.js"></script>
     <script src="https://navdialog.mehfi.us/src/navdialog.js"></script>
@@ -46,6 +48,11 @@
         globalThis.auth.SUPABASE_URL = "https://xwejzglvqsiydycvivys.supabase.co/";
         speedj('/css/home.css');
         speedj('/js/home/home.js');
+
+
+
+        globalThis.supabase = window.supabase.createClient(globalThis.auth.SUPABASE_URL, globalThis.auth.SUPABASE_ANON_KEY);
+
     </script>    
  
 

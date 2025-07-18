@@ -1,5 +1,6 @@
 body>header{
     width: 100%;
+    max-width: 960px; /* Adicionado: Define a largura máxima */
     display: flex;
     align-items: center;
     gap: 20px;
@@ -7,13 +8,16 @@ body>header{
     /* Adicione estas duas propriedades para alinhar os itens no final (direita) */
     justify-content: flex-end; /* Alinha os itens ao final do contêiner flex */
     flex-wrap: wrap; /* Permite que os itens quebrem a linha se não houver espaço */
+    margin-left: auto; /* Adicionado: Centraliza o elemento */
+    margin-right: auto; /* Adicionado: Centraliza o elemento */
 }
 body>header>*{
     border-radius: 15px;
-    font-size: 80%;      
-    cursor: pointer; 
-    border: 0;        
+    font-size: 80%;       
+    cursor: pointer;    
+    border: 0;          
     font-family: "Segoe UI";
+    line-height: 1;     
 }
 body>header>rooms{
     background-color: #fff;
@@ -21,68 +25,80 @@ body>header>rooms{
 }
 body>header>airbnb{
     background-color: #fff;
-    padding: 7px 15px;      
+    padding: 7px 15px;          
 }
 body>header>select {
     padding: 7px 15px;
 }
 body>header>input{
     padding: 7px 15px;
+    width: 90px;
+
 }
 body>content {
     width: 100%;
+    max-width: 960px; /* Adicionado: Define a largura máxima */
     display: block;
-    float: left;
-    margin: 0;
+    float: none; /* Alterado: Remove o float */
+    margin: 0 auto; /* Adicionado: Centraliza o elemento */
     padding: 0;
 }
 body>content>item {
     float: left;
     width: 100%;
     margin-bottom: 1px;
-    background-color: #000;
+    background-color: var(--content-color-item);
+    cursor:pointer;
+    color: var(--container-color-label);        
+    border-radius: 5px;
+    padding: 5px;       
+}
+body>content>item:hover {
+    background-color:#ff385c;
+    color:#fff;
 }
 body>content>item>container {
     display: flex;
     align-items: center;
     width: 100%;
+    /* Adicionado: Adiciona espaçamento entre os itens */
+    gap: 10px; 
 }
+body>content>item>container>* {
+   font-size: 100%;
 
+}
 body>content>item>container>figure {
-    width: 64px;
-    height: 64px;
+    width: 32px;
+    height: 32px;
     margin: 0;
     padding: 0;
     background-color: var(--container-color-figure);
-    background-size: cover;
-    background-position: center;
+    border-radius: 5px;
+    /* Adicionado: Garante que figure não encolha */
+    flex-shrink: 0;
 }
 
-body>content>item>container>label {
-    flex: 1;
-    font-size: 80%;
+body>content>item>container>room_title {
+    flex: 1; 
     letter-spacing: 1px;
-    padding: 20px 0;
-    color: var(--container-color-label);
     white-space: nowrap;
     overflow-x: hidden;
     text-overflow: ellipsis;
 }
 body>content>item>container>position {
-    font-size: 80%;
     letter-spacing: 1px;
-    padding: 20px;
-    color: var(--container-color-label);
     width: 20px;
     text-align: right;
+    /* Adicionado: Garante que position não encolha */
+    flex-shrink: 0;
 }
 body>content>item>container>price {
-    font-size: 80%;
     letter-spacing: 1px;
-    padding: 20px;
-    color: var(--container-color-label);
     width: 80px;
     text-align: right;
+    /* Adicionado: Garante que price não encolha */
+    flex-shrink: 0;
 }
 body > content > item > container > reference:empty {
     display: none; 
@@ -93,19 +109,20 @@ body>content>item>container>reference {
     border-radius: 20px;
     padding: 2px 10px;
     font-size: 100%;
-    color: #000;
+    /* Adicionado: Garante que reference não encolha */
+    flex-shrink: 0;
 }
 body>content>item>container>favorite {
     letter-spacing: 1px;
-    padding: 20px;
-    color: var(--container-color-label);
     text-align: right;
+    /* Adicionado: Garante que favorite não encolha */
+    flex-shrink: 0;
 }
 body>content>item>container>superhost {
     letter-spacing: 1px;
-    padding: 20px;
-    color: var(--container-color-label);
     text-align: right;
+    /* Adicionado: Garante que superhost não encolha */
+    flex-shrink: 0;
 }
 .material-icons.true{
     opacity:1;

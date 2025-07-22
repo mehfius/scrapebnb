@@ -83,11 +83,21 @@
         }
     };
 
+    let realtimeChannel = null;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_INTERVAL = 60000; // 1 minuto
+    const INITIAL_RECONNECT_INTERVAL = 1000; // 1 segundo
+
     const setupRealtimeListener = () => {
         if (!globalThis.supabase) {
             console.error('Cliente Supabase não inicializado. Certifique-se de que `globalThis.supabase` está configurado.');
             div.innerHTML = 'Ocorreu um erro: Cliente Supabase não inicializado.';
             return;
+        }
+
+        if (realtimeChannel) {
+            realtimeChannel.unsubscribe();
+            console.log('Canal em tempo real anterior desinscrito.');
         }
 
         globalThis.supabase
@@ -105,7 +115,7 @@
                 displayJobs(data);
             });
 
-        globalThis.supabase
+        realtimeChannel = globalThis.supabase
             .channel('public:jobs')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, payload => {
                 console.log('Change received!', payload);
@@ -124,12 +134,25 @@
             .subscribe((status, err) => {
                 if (status === 'SUBSCRIBED') {
                     console.log('Conectado ao canal em tempo real!');
+                    reconnectAttempts = 0; // Reset attempts on successful connection
                 } else if (status === 'CHANNEL_ERROR') {
-                    console.error('Erro no canal em tempo real:', err.message);
+                    console.error('Erro no canal em tempo real:', err ? err.message : 'Erro desconhecido no canal.', err); // Log o erro completo
+                    reconnectAttempts++;
+                    const delay = Math.min(INITIAL_RECONNECT_INTERVAL * Math.pow(2, reconnectAttempts - 1), MAX_RECONNECT_INTERVAL);
+                    console.warn(`Tentando reconectar em ${delay / 1000} segundos... (Tentativa ${reconnectAttempts})`);
+                    setTimeout(setupRealtimeListener, delay);
                 } else if (status === 'TIMED_OUT') {
-                    console.warn('Tempo limite excedido para conexão em tempo real.');
+                    console.warn('Tempo limite excedido para conexão em tempo real. Tentando reconectar...');
+                    reconnectAttempts++;
+                    const delay = Math.min(INITIAL_RECONNECT_INTERVAL * Math.pow(2, reconnectAttempts - 1), MAX_RECONNECT_INTERVAL);
+                    console.warn(`Tentando reconectar em ${delay / 1000} segundos... (Tentativa ${reconnectAttempts})`);
+                    setTimeout(setupRealtimeListener, delay);
                 } else if (status === 'CLOSED') {
-                    console.log('Canal em tempo real fechado inesperadamente.');
+                    console.log('Canal em tempo real fechado inesperadamente. Tentando reconectar...');
+                    reconnectAttempts++;
+                    const delay = Math.min(INITIAL_RECONNECT_INTERVAL * Math.pow(2, reconnectAttempts - 1), MAX_RECONNECT_INTERVAL);
+                    console.warn(`Tentando reconectar em ${delay / 1000} segundos... (Tentativa ${reconnectAttempts})`);
+                    setTimeout(setupRealtimeListener, delay);
                 }
             });
     };

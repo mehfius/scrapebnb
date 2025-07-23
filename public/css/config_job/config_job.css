@@ -1,0 +1,44 @@
+
+
+dialog > content > div > item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+dialog > content > div > item > * {
+
+}
+
+dialog > content > div > item > id {
+
+}
+
+dialog > content > div > item > label {
+  width: 300px;
+}
+
+dialog > content > div > item > adults {
+  width: 50px;
+  text-align: right;
+}
+
+dialog > content > div > item > min_bedrooms {
+  width: 50px;
+  text-align: right;
+}
+
+dialog > content > div > item > days {
+  width: 50px;
+  text-align: right;
+}
+
+dialog > content > div > item > distinct_rooms {
+  width: 50px;
+  text-align: right;
+}
+
+dialog > content > div > item > start {
+    cursor:pointer;
+}
+

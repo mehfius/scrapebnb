@@ -53,6 +53,9 @@ body>content>item {
     border-radius: 5px;
     padding: 5px;       
 }
+body>content>item[gold] {
+    background-color:#f6e993;
+}
 body>content>item:hover {
     background-color:#ff385c;
     color:#fff;

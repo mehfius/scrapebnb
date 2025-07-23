@@ -23,12 +23,12 @@
         tag: 'select',
         id: 'job-select'
     });
-    const eConfigJob = jte({
-        tag: 'config_job',
-        innerhtml: 'settings',
-        class: 'material-icons true'
-    });
-    eConfigJob.onclick = () => speedj('/js/config_job/config_job.js');
+    const eConfigJob = jte({
+        tag: 'config_job',
+        innerhtml: 'settings',
+        class: 'material-icons true'
+    });
+    eConfigJob.onclick = () => speedj('/js/config_job/config_job.js');
     const eRooms = jte({
         tag: 'rooms',
         innerhtml: 'holiday_village',
@@ -36,20 +36,40 @@
     });
     eRooms.addEventListener('click', () => {
         speedj('/js/rooms/rooms.js');
-    });    
+    });
     const eDateLabel = jte({ tag: 'label' });
 
     eHeader.appendChild(eDateLabel);
     eHeader.appendChild(eRooms);
-    
+
     const airbnb = jte({ tag: 'airbnb', innerhtml: 'Ver Anúncio no Airbnb' });
     eHeader.appendChild(airbnb);
 
-
-
     eHeader.appendChild(eCalendar);
     eHeader.appendChild(eJobSelect);
-    eHeader.appendChild(eConfigJob);
+
+    const eSortSelect = jte({
+        tag: 'select',
+        id: 'sort-select'
+    });
+    eHeader.appendChild(eSortSelect);
+
+    const sortOptions = [
+        { value: 'position', label: 'Ordernar por Posição' },
+        { value: 'price', label: 'Ordernar por Preço' }
+    ];
+
+    sortOptions.forEach(option => {
+        const opt = jte({
+            tag: 'option',
+            value: option.value,
+            innerhtml: option.label
+        });
+        eSortSelect.appendChild(opt);
+    });
+
+
+    eHeader.appendChild(eConfigJob);
 
     const updateDateLabel = (dateString) => {
         const date = new Date(dateString + 'T00:00:00'); // Add T00:00:00 to avoid timezone issues
@@ -67,7 +87,7 @@
             checkoutDate.setDate(checkinDate.getDate() + 3);
             const checkoutDateString = checkoutDate.toISOString().split('T')[0];
             const url = `https://www.airbnb.com.br/s/${job.tag}/homes?adults=${job.adults}&min_bedrooms=${job.min_bedrooms}&check_in=${checkinDateString}&check_out=${checkoutDateString}${job.amenities && job.amenities.length > 0 ? job.amenities.map(amenity => `&amenities%5B%5D=${amenity}`).join('') : ''}${job.price_max ? `&price_max=${job.price_max}&price_filter_input_type=${job.price_filter_input_type}` : ''}`;
-            
+
             airbnb.onclick = () => window.open(url, '_blank');
         } else {
             if (globalThis.jobs) {
@@ -118,13 +138,19 @@
         return latestJobId;
     };
 
-    const fetchDataForDate = async (checkinDate, jobId) => {
+    const fetchDataForDate = async (checkinDate, jobId, sortBy) => {
         eContent.innerHTML = '';
 
-        let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost,reference_label,average_price_per_night&checkin=eq.${checkinDate}&limit=72&order=position`;
+        let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,best_price,best_position,gold,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost,reference_label,average_price_per_night&checkin=eq.${checkinDate}&limit=72`;
 
         if (jobId) {
             url += `&job=eq.${jobId}`;
+        }
+
+        if (sortBy === 'price') {
+            url += `&order=average_price_per_night`;
+        } else {
+            url += `&order=position`;
         }
 
         const r = await fetch(
@@ -138,6 +164,9 @@
             data.forEach(item => {
                 let style = 'background-image: url(' + item.host_image + '); background-size: cover; background-position: center;';
                 const eItem = jte({ tag: 'item' });
+                if (item.gold) {
+                    eItem.setAttribute('gold', '');
+                }
                 const eContainer = jte({ tag: 'container' });
 
                 eContainer.appendChild(jte({ tag: 'figure', style: style }));
@@ -165,14 +194,18 @@
 
     eCalendar.addEventListener('change', (event) => {
         const newDate = event.target.value;
-        fetchDataForDate(newDate, eJobSelect.value);
+        fetchDataForDate(newDate, eJobSelect.value, eSortSelect.value);
         updateViewJobLink();
         updateDateLabel(newDate);
     });
 
     eJobSelect.addEventListener('change', (event) => {
-        fetchDataForDate(eCalendar.value, event.target.value);
+        fetchDataForDate(eCalendar.value, event.target.value, eSortSelect.value);
         updateViewJobLink();
+    });
+
+    eSortSelect.addEventListener('change', (event) => {
+        fetchDataForDate(eCalendar.value, eJobSelect.value, event.target.value);
     });
 
     document.addEventListener('keydown', (event) => {
@@ -181,21 +214,21 @@
             currentDate.setDate(currentDate.getDate() - 1);
             const newDateFormatted = currentDate.toISOString().split('T')[0];
             eCalendar.value = newDateFormatted;
-            fetchDataForDate(newDateFormatted, eJobSelect.value);
+            fetchDataForDate(newDateFormatted, eJobSelect.value, eSortSelect.value);
             updateViewJobLink();
             updateDateLabel(newDateFormatted);
         } else if (event.key === 'ArrowRight') {
             currentDate.setDate(currentDate.getDate() + 1);
             const newDateFormatted = currentDate.toISOString().split('T')[0];
             eCalendar.value = newDateFormatted;
-            fetchDataForDate(newDateFormatted, eJobSelect.value);
+            fetchDataForDate(newDateFormatted, eJobSelect.value, eSortSelect.value);
             updateViewJobLink();
             updateDateLabel(newDateFormatted);
         }
     });
 
     const initialJobId = await populateJobSelect();
-    fetchDataForDate(tomorrowFormatted, initialJobId);
+    fetchDataForDate(tomorrowFormatted, initialJobId, eSortSelect.value);
     updateViewJobLink();
     updateDateLabel(tomorrowFormatted);
 

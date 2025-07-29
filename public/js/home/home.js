@@ -26,13 +26,13 @@
     const eConfigJob = jte({
         tag: 'config_job',
         innerhtml: 'settings',
-        class: 'material-icons true'
+        class: 'material-symbols-outlined true'
     });
     eConfigJob.onclick = () => speedj('/js/config_job/config_job.js');
     const eRooms = jte({
         tag: 'rooms',
         innerhtml: 'holiday_village',
-        class: 'material-icons true'
+        class: 'material-symbols-outlined true'
     });
     eRooms.addEventListener('click', () => {
         speedj('/js/rooms/rooms.js');
@@ -104,7 +104,7 @@
     });
     document.body.append(eContent);
 
-    const icon = 'material-icons';
+    const icon = 'material-symbols-outlined';
 
     const populateJobSelect = async () => {
         const r = await fetch(
@@ -141,7 +141,7 @@
     const fetchDataForDate = async (checkinDate, jobId, sortBy) => {
         eContent.innerHTML = '';
 
-        let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,best_price,best_position,gold,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost,reference_label,average_price_per_night&checkin=eq.${checkinDate}&limit=72`;
+        let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,best_price,best_position,gold,room_image_array,tiny_description,position,title,price,host_image,favorite,superhost,reference_label,average_price_per_night,tagged&checkin=eq.${checkinDate}&limit=72`;
 
         if (jobId) {
             url += `&job=eq.${jobId}`;
@@ -164,9 +164,11 @@
             data.forEach(item => {
                 let style = 'background-image: url(' + item.host_image + '); background-size: cover; background-position: center;';
                 const eItem = jte({ tag: 'item' });
-                if (item.gold) {
-                    eItem.setAttribute('gold', '');
+                
+                if (item.tagged) {
+                    eItem.setAttribute('tagged', '');
                 }
+
                 const eContainer = jte({ tag: 'container' });
 
                 eContainer.appendChild(jte({ tag: 'figure', style: style }));
@@ -175,6 +177,7 @@
                 eContainer.appendChild(jte({ tag: 'reference', innerhtml: item.reference_label || '' }));
                 eContainer.appendChild(jte({ tag: 'favorite', innerhtml: 'favorite', class: icon + ' ' + item.favorite }));
                 eContainer.appendChild(jte({ tag: 'superhost', innerhtml: 'star', class: icon + ' ' + item.superhost }));
+                eContainer.appendChild(jte({ tag: 'gold', innerhtml: 'beenhere', class: icon + ' ' + item.gold })); // Adicionado o elemento gold
                 eContainer.appendChild(jte({ tag: 'price', innerhtml: 'R$ ' + item.average_price_per_night }));
 
 

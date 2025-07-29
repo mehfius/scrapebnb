@@ -29,23 +29,31 @@
 
     const displayJobs = (jobs) => {
         mainContainer.innerHTML = '';
+        let lastRoomTitle = null;
 
         if (jobs.length > 0) {
             jobs.forEach(job => {
                 const jobItem = jte({ tag: 'item' });
 
-                const desiredFields = ['id', 'label', 'adults', 'min_bedrooms', 'days', 'status', 'distinct_rooms' ];
+                // Exibir room_title apenas se for o primeiro registro ou se for diferente do anterior
+                if (job.room_title !== lastRoomTitle) {
+                    const roomTitleElement = jte({ tag: 'room_title_display' });
+                    roomTitleElement.appendChild(document.createTextNode(job.room_title || 'N/A'));
+                    jobItem.appendChild(roomTitleElement);
+                    lastRoomTitle = job.room_title;
+                }
+
+                const desiredFields = ['id', 'label', 'adults', 'min_bedrooms', 'days', 'distinct_rooms', 'total_records_for_tagged_room', 'best_price_count_for_tagged_room', 'best_position_count_for_tagged_room', 'room_host'];
                 
                 desiredFields.forEach(fieldKey => {
                     const fieldElement = jte({ tag: fieldKey });
-                    // Removido o elemento strong e o nome do campo
-                    fieldElement.appendChild(document.createTextNode(job[fieldKey] || 'N/A'));
+                    fieldElement.appendChild(document.createTextNode(job[fieldKey] || '0'));
                     jobItem.appendChild(fieldElement);
                 });
 
                 const startButton = jte({ 
                     tag: 'start', 
-                    class: 'material-icons',
+                    class: 'material-symbols-outlined',
                     innerhtml: 'start' 
                 });
                 
@@ -75,8 +83,8 @@
         try {
             const { data, error } = await globalThis.supabase
                 .from('view_jobs')
-                .select('id,label,adults,min_bedrooms,days,tag,status,distinct_rooms')
-                .order('id', { ascending: false });
+                .select('id,label,adults,min_bedrooms,days,tag,status,distinct_rooms,total_records_for_tagged_room,best_price_count_for_tagged_room,best_position_count_for_tagged_room,room_title,room_host,room_id')
+                .order('room_id', { ascending: false });
 
             if (error) {
                 console.error('Erro ao buscar dados do Supabase:', error);

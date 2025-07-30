@@ -186,7 +186,6 @@
 
                 eItem.addEventListener('click', () => {
                     globalThis.modal.id = item.id;
-                    console.log('globalThis.modal.id set to:', globalThis.modal.id);
                     speedj('/js/home/room.js');
                 });
             });

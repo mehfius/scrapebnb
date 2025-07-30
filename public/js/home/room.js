@@ -9,8 +9,6 @@
 
     const icon = 'material-symbols-outlined';
 
-    console.log('globalThis.jobs:', globalThis.jobs);
-
     const fetchDataForId = async (itemId) => {
         if (!itemId) {
             div.innerHTML = 'Selecione um item para ver os detalhes.';

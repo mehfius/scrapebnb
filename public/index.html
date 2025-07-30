@@ -40,75 +40,16 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="/js/supabase_auth_airbnb.js"></script>
     <script src="https://speedj.mehfi.us/src/speedj.js" data-production-domain="mehfi.us"></script>    
     <script src="https://jte.mehfi.us/src/jte.js"></script>
     <script src="https://navdialog.mehfi.us/src/navdialog.js"></script>
     <script>
-        globalThis.auth = {}
-        globalThis.auth.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3ZWp6Z2x2cXNpeWR5Y3ZpdnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyNDgzOTQsImV4cCI6MjA1NzgyNDM5NH0.32ClzsWEgc_XdqXD4d8i7_AO4SOIjKjzQCPb_SjJBoU";
-        globalThis.auth.SUPABASE_URL = "https://xwejzglvqsiydycvivys.supabase.co/";
+
         speedj('/css/home.css');
         speedj('/js/home/home.js');
 
-
-
-        globalThis.supabase = window.supabase.createClient(globalThis.auth.SUPABASE_URL, globalThis.auth.SUPABASE_ANON_KEY);
-
-
-
-
-    let realtimeChannel = null;
-    let reconnectAttempts = 0;
-    const MAX_RECONNECT_INTERVAL = 60000;
-    const INITIAL_RECONNECT_INTERVAL = 1000;
-
-    const setupRealtimeListener = () => {
-        if (!globalThis.supabase) {
-            console.error('Cliente Supabase não inicializado.');
-            return;
-        }
-
-        if (realtimeChannel) {
-            realtimeChannel.unsubscribe();
-            console.log('Canal em tempo real anterior desinscrito.');
-        }
-
-        realtimeChannel = globalThis.supabase
-            .channel('public:jobs')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, payload => {
-                console.log('Dados alterados!', payload);
-                // Você pode adicionar uma lógica aqui para buscar os dados novamente,
-                // ou simplesmente logar a alteração, dependendo do que você precisa.
-                // Por exemplo, para buscar e logar os dados atualizados:
-                globalThis.supabase
-                    .from('jobs')
-                    .select('*')
-                    .then(({ data, error }) => {
-                        if (error) {
-                            console.error('Erro ao buscar dados do Supabase após atualização:', error);
-                            return;
-                        }
-                        console.log('Dados da tabela jobs atualizados:', data);
-                    });
-            })
-            .subscribe((status, err) => {
-                if (status === 'SUBSCRIBED') {
-                    console.log('Conectado ao canal em tempo real!');
-                    reconnectAttempts = 0;
-                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-                    console.error('Erro no canal em tempo real ou fechado inesperadamente:', err ? err.message : 'Erro desconhecido.', err);
-                    reconnectAttempts++;
-                    const delay = Math.min(INITIAL_RECONNECT_INTERVAL * Math.pow(2, reconnectAttempts - 1), MAX_RECONNECT_INTERVAL);
-                    console.warn(`Tentando reconectar em ${delay / 1000} segundos... (Tentativa ${reconnectAttempts})`);
-                    setTimeout(setupRealtimeListener, delay);
-                }
-            });
-    };
-
- /*    setupRealtimeListener(); */
-
     </script>    
- 
 
 <body>
 

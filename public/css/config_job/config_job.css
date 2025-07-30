@@ -4,6 +4,7 @@ dialog > content > div > item {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
 dialog > content > div > item > * {
@@ -14,9 +15,14 @@ dialog > content > div > item > id {
 
 }
 
-dialog > content > div > item > label {
-  width: 300px;
+dialog > content > div > item > label{
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #004953;
+    border-radius: 5px;
+    margin-bottom: 5px;
 }
+
 
 dialog > content > div > item > adults {
   width: 50px;

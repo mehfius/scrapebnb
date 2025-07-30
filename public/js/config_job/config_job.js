@@ -29,21 +29,21 @@
 
     const displayJobs = (jobs) => {
         mainContainer.innerHTML = '';
-        let lastRoomTitle = null;
+        let label = null;
 
         if (jobs.length > 0) {
             jobs.forEach(job => {
                 const jobItem = jte({ tag: 'item' });
 
                 // Exibir room_title apenas se for o primeiro registro ou se for diferente do anterior
-                if (job.room_title !== lastRoomTitle) {
-                    const roomTitleElement = jte({ tag: 'room_title_display' });
+                if (job.label !== label) {
+                    const roomTitleElement = jte({ tag: 'label' });
                     roomTitleElement.appendChild(document.createTextNode(job.room_title || 'N/A'));
                     jobItem.appendChild(roomTitleElement);
-                    lastRoomTitle = job.room_title;
+                    label = job.label;
                 }
 
-                const desiredFields = ['id', 'label', 'adults', 'min_bedrooms', 'days', 'distinct_rooms', 'total_records_for_tagged_room', 'best_price_count_for_tagged_room', 'best_position_count_for_tagged_room', 'room_host'];
+                const desiredFields = ['room_title','id', 'adults', 'min_bedrooms', 'days', 'distinct_rooms', 'total_records_for_tagged_room', 'best_price_count_for_tagged_room', 'best_position_count_for_tagged_room'];
                 
                 desiredFields.forEach(fieldKey => {
                     const fieldElement = jte({ tag: fieldKey });
@@ -84,7 +84,7 @@
             const { data, error } = await globalThis.supabase
                 .from('view_jobs')
                 .select('id,label,adults,min_bedrooms,days,tag,status,distinct_rooms,total_records_for_tagged_room,best_price_count_for_tagged_room,best_position_count_for_tagged_room,room_title,room_host,room_id')
-                .order('room_id', { ascending: false });
+                .order('id', { ascending: false });
 
             if (error) {
                 console.error('Erro ao buscar dados do Supabase:', error);

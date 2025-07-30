@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Jobs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .btn-start {
+            @apply bg-green-500 text-white p-2 rounded-md shadow-md hover:bg-green-600 transition-colors duration-200 flex items-center justify-center;
+        }
+        .btn-start:disabled {
+            @apply bg-gray-400 cursor-not-allowed;
+        }
+        .message-box {
+            @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-xl border border-gray-200 z-50;
+            min-width: 300px;
+            text-align: center;
+        }
+        .message-box button {
+            @apply mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <h1 class="text-3xl sm:text-4xl font-extrabold mb-6 text-center text-gray-800">Relatório de Jobs</h1>
+
+        <div id="loadingIndicator" class="text-center text-blue-600 text-lg sm:text-xl mb-4 hidden animate-pulse">
+            Carregando dados...
+        </div>
+        <div id="errorMessage" class="text-center text-red-600 text-lg sm:text-xl mb-4 hidden p-4 bg-red-100 border border-red-400 rounded-md"></div>
+
+        <div id="jobsReport" class="bg-white shadow-lg rounded-xl overflow-hidden">
+            <div class="p-4 text-center text-gray-500" id="noDataMessage">Nenhum dado encontrado.</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="https://scrapebnb.vercel.app/js/supabase_auth_airbnb.js"></script>
+    <script>
+        let supabase = null;
+
+        function showMessageBox(message, type = 'info') {
+            const existingMessageBox = document.getElementById('customMessageBox');
+            if (existingMessageBox) {
+                existingMessageBox.remove();
+            }
+
+            const messageBox = document.createElement('div');
+            messageBox.id = 'customMessageBox';
+            messageBox.className = 'message-box';
+            messageBox.innerHTML = `
+                <p class="text-gray-700 text-lg mb-3">${message}</p>
+                <button id="messageBoxCloseBtn" class="btn-start">OK</button>
+            `;
+            document.body.appendChild(messageBox);
+
+            document.getElementById('messageBoxCloseBtn').onclick = () => {
+                messageBox.remove();
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorMessage = document.getElementById('errorMessage');
+            const jobsReportContainer = document.getElementById('jobsReport');
+            const noDataMessage = document.getElementById('noDataMessage');
+
+            try {
+                supabase = globalThis.supabase;
+                console.log('Supabase client initialized.');
+            } catch (error) {
+                console.error('Erro ao inicializar o cliente Supabase:', error);
+                errorMessage.textContent = 'Erro ao inicializar o Supabase. Verifique suas chaves e a conexão.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            const updateJobStatus = async (jobId, newStatus) => {
+                if (!supabase) {
+                    console.error('Cliente Supabase não inicializado.');
+                    showMessageBox('Erro: Cliente Supabase não inicializado.');
+                    return;
+                }
+
+                try {
+                    loadingIndicator.classList.remove('hidden');
+                    errorMessage.classList.add('hidden');
+
+                    const { data, error } = await supabase
+                        .from('jobs')
+                        .update({ status: newStatus })
+                        .eq('id', jobId)
+                        .select();
+
+                    if (error) {
+                        throw new Error(`Erro ao atualizar o status do job ${jobId}: ${error.message}`);
+                    }
+                    console.log(`Status do job ${jobId} atualizado para ${newStatus}`, data);
+                    fetchAndDisplayJobs();
+                } catch (error) {
+                    console.error('Erro ao atualizar job:', error);
+                    showMessageBox('Ocorreu um erro ao atualizar o status: ' + error.message);
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                }
+            };
+
+            const displayJobs = (jobs) => {
+                jobsReportContainer.innerHTML = '';
+                noDataMessage.classList.add('hidden');
+
+                if (jobs.length === 0) {
+                    noDataMessage.classList.remove('hidden');
+                    return;
+                }
+
+                const groupedJobs = jobs.reduce((acc, job) => {
+                    if (!acc[job.id]) {
+                        acc[job.id] = [];
+                    }
+                    acc[job.id].push(job);
+                    return acc;
+                }, {});
+
+                for (const jobId in groupedJobs) {
+                    const jobGroup = groupedJobs[jobId];
+                    const days = jobGroup[0].days !== null && jobGroup[0].days !== undefined ? jobGroup[0].days : '0';
+                    const distinctRooms = jobGroup[0].distinct_rooms !== null && jobGroup[0].distinct_rooms !== undefined ? jobGroup[0].distinct_rooms : '0';
+                    const label = jobGroup[0].label !== null && jobGroup[0].label !== undefined ? jobGroup[0].label : 'N/A';
+                    const hostImage = jobGroup[0].host_image ? jobGroup[0].host_image : 'https://placehold.co/40x40/cccccc/ffffff?text=No+Img';
+
+                    const labelSection = document.createElement('div');
+                    labelSection.className = 'mb-8 p-4 bg-gray-50 rounded-lg shadow-sm';
+                    labelSection.innerHTML = `
+                        <h2 class="text-2xl font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200">
+                            <span class="text-blue-700">${jobId || 'N/A'}</span> - <span class="text-blue-700">${label}</span>
+                            <span class="text-gray-500 text-base ml-2">(Dias: ${days}, Concorrentes: ${distinctRooms})</span>
+                        </h2>
+                        <div class="overflow-x-auto rounded-md border border-gray-200">
+                            <table class="min-w-full bg-white">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider rounded-tl-md">Host Image</th>
+                                        <th class="py-3 px-4 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider">Room Title</th>
+                                        <th class="py-3 px-4 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider">Best Price Count</th>
+                                        <th class="py-3 px-4 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider">Best Position Count</th>
+                                        <th class="py-3 px-4 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider rounded-tr-md">Total Records</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    const tbody = labelSection.querySelector('tbody');
+
+                    jobGroup.forEach(job => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-50 transition-colors duration-150';
+
+                        // Host Image column
+                        let tdHostImage = document.createElement('td');
+                        tdHostImage.className = 'py-3 px-4 whitespace-nowrap text-sm text-gray-800 text-center';
+                        if (job.host_image) {
+                            const img = document.createElement('img');
+                            img.src = job.host_image;
+                            img.alt = 'Host Image';
+                            img.className = 'w-10 h-10 rounded-full object-cover mx-auto';
+                            img.onerror = function() {
+                                this.onerror=null;
+                                this.src='https://placehold.co/40x40/cccccc/ffffff?text=No+Img';
+                            };
+                            tdHostImage.appendChild(img);
+                        } else {
+                            tdHostImage.textContent = 'N/A';
+                        }
+                        row.appendChild(tdHostImage);
+
+                        // Room Title and Room Tiny Description column
+                        let tdRoomTitle = document.createElement('td');
+                        tdRoomTitle.className = 'py-3 px-4 whitespace-nowrap text-sm text-gray-800 text-left';
+                        
+                        const roomTitleSpan = document.createElement('span');
+                        roomTitleSpan.textContent = job.room_title !== null && job.room_title !== undefined ? job.room_title : 'N/A';
+                        tdRoomTitle.appendChild(roomTitleSpan);
+
+                        if (job.room_tiny_description) {
+                            const roomTinyDescriptionDiv = document.createElement('div');
+                            roomTinyDescriptionDiv.className = 'text-xs text-gray-500 mt-1'; // Smaller font and margin-top
+                            roomTinyDescriptionDiv.textContent = job.room_tiny_description;
+                            tdRoomTitle.appendChild(roomTinyDescriptionDiv);
+                        }
+                        row.appendChild(tdRoomTitle);
+
+                        // Other fields
+                        const fields = [
+                            { key: 'best_price_count_for_tagged_room', default: '0', align: 'right' },
+                            { key: 'best_position_count_for_tagged_room', default: '0', align: 'right' },
+                            { key: 'total_records_for_tagged_room', default: '0', align: 'right' }
+                        ];
+
+                        fields.forEach(field => {
+                            const td = document.createElement('td');
+                            td.className = `py-3 px-4 whitespace-nowrap text-sm text-gray-800 text-${field.align}`;
+                            td.textContent = job[field.key] !== null && job[field.key] !== undefined ? job[field.key] : field.default;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    jobsReportContainer.appendChild(labelSection);
+                }
+            };
+
+            const fetchAndDisplayJobs = async () => {
+                if (!supabase) {
+                    errorMessage.textContent = 'Erro: Cliente Supabase não inicializado. Verifique suas chaves.';
+                    errorMessage.classList.remove('hidden');
+                    return;
+                }
+
+                try {
+                    loadingIndicator.classList.remove('hidden');
+                    errorMessage.classList.add('hidden');
+                    noDataMessage.classList.add('hidden');
+
+                    const { data, error } = await supabase
+                        .from('view_jobs')
+                        .select('id,label,adults,min_bedrooms,days,tag,status,distinct_rooms,total_records_for_tagged_room,best_price_count_for_tagged_room,best_position_count_for_tagged_room,room_title,host_image,room_id,room_tiny_description') // room_tiny_description added
+                        .order('id', { ascending: true });
+
+                    if (error) {
+                        throw new Error(`Erro ao buscar dados do Supabase: ${error.message}`);
+                    }
+
+                    console.log('Dados buscados:', data);
+                    displayJobs(data);
+                } catch (error) {
+                    console.error('Erro geral ao buscar e exibir jobs:', error);
+                    errorMessage.textContent = 'Ocorreu um erro inesperado ao carregar os dados: ' + error.message;
+                    errorMessage.classList.remove('hidden');
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                }
+            };
+
+            fetchAndDisplayJobs();
+        });
+    </script>
+</body>
+</html>

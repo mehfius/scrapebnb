@@ -50,6 +50,20 @@
         .custom-select-options {
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
+        /* Marker Opacity Transition */
+        .leaflet-marker-icon {
+            transition: opacity 0.3s ease-in-out;
+        }
+        /* Tagged Highlight Style */
+        .tagged-highlight {
+            border-color: #facc15; /* Tailwind amber-400 */
+            box-shadow: 0 0 8px 2px rgba(250, 204, 21, 0.6);
+        }
+         /* Remove arrow from date input */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            display: none;
+            -webkit-appearance: none;
+        }
     </style>
 </head>
 <body class="flex flex-col">
@@ -101,6 +115,20 @@
         let markersLayer = null;
         let jobs = [];
         let selectedJobId = null;
+        let currentLocations = []; // Array to hold current location data with markers
+
+        // --- Configure small default marker ---
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+            iconSize:    [13, 21],
+            iconAnchor:  [6, 21],
+            popupAnchor: [1, -20],
+            shadowSize:  [21, 21]
+        });
+
 
         const createElement = (tag, options = {}) => {
             const el = document.createElement(tag);
@@ -122,16 +150,25 @@
         tomorrow.setDate(today.getDate() + 1);
         const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
 
-        const baseInputClasses = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5';
+        const baseInputClasses = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5';
         
         const eLogo = createElement('img', { className: 'w-[200px] h-auto' });
         eLogo.src = 'https://scrapebnb.vercel.app/img/scrapebnb.jpg';
         const airbnb = createElement('a', { innerHTML: 'Ver no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap` });
-        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses} w-[200px]` });
         
+        // --- Date Control Component ---
+        const eDateControlContainer = createElement('div', { className: 'flex items-center' });
+        const ePrevDayBtn = createElement('button', { id: 'prev-day-btn', className: 'p-2.5 rounded-l-lg bg-gray-50 border border-r-0 border-gray-300 hover:bg-gray-100 transition-colors' });
+        ePrevDayBtn.innerHTML = `<span class="material-symbols-outlined text-gray-600 text-base">chevron_left</span>`;
+        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `bg-gray-50 border-t border-b border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-[150px]` });
+        const eNextDayBtn = createElement('button', { id: 'next-day-btn', className: 'p-2.5 rounded-r-lg bg-gray-50 border border-l-0 border-gray-300 hover:bg-gray-100 transition-colors' });
+        eNextDayBtn.innerHTML = `<span class="material-symbols-outlined text-gray-600 text-base">chevron_right</span>`;
+        eDateControlContainer.append(ePrevDayBtn, eCalendar, eNextDayBtn);
+        // --- End Date Control ---
+
         // --- Custom Select Component ---
         const eJobSelectContainer = createElement('div', { id: 'job-select-container', className: 'relative' });
-        const eJobSelectButton = createElement('button', { id: 'job-select-button', className: `${baseInputClasses} flex items-center justify-between text-left w-auto` });
+        const eJobSelectButton = createElement('button', { id: 'job-select-button', className: `${baseInputClasses} flex items-center justify-between text-left w-auto rounded-lg` });
         const eJobSelectButtonText = createElement('span', { innerHTML: 'Carregando jobs...' });
         const eJobSelectButtonIcon = createElement('span', { className: 'material-symbols-outlined text-gray-500 ml-2', innerHTML: 'expand_more' });
         eJobSelectButton.append(eJobSelectButtonText, eJobSelectButtonIcon);
@@ -163,11 +200,31 @@
         const eHeaderCenter = createElement('div', { className: 'flex items-center gap-2' });
 
         eHeaderLeft.append(eLogo);
-        eHeaderCenter.append(eCalendar, eJobSelectContainer);
+        eHeaderCenter.append(eDateControlContainer, eJobSelectContainer);
         eHeader.append(eHeaderLeft, eHeaderCenter, airbnb);
+
+        const resetHighlights = () => {
+            currentLocations.forEach(loc => {
+                if (loc.marker) {
+                    loc.marker.setOpacity(1.0);
+                }
+            });
+        };
 
         const closeSidebar = () => {
             eSidebar.classList.remove('is-open');
+            resetHighlights();
+        };
+
+        const selectItem = (selectedItem) => {
+            currentLocations.forEach(loc => {
+                if (loc.marker) {
+                    const isSelected = loc.id === selectedItem.id;
+                    loc.marker.setOpacity(isSelected ? 1.0 : 0.5);
+                }
+            });
+            openSidebar(selectedItem);
+            map.panTo([selectedItem.latitude, selectedItem.longitude]);
         };
 
         const openSidebar = (item) => {
@@ -252,7 +309,7 @@
                         optionEl.addEventListener('click', () => {
                             selectedJobId = job.id;
                             eJobSelectButtonText.innerHTML = label;
-                            fetchDataForDate(eCalendar.value, selectedJobId);
+                            fetchDataForDate(eCalendar.value, selectedJobId, true);
                             updateViewJobLink();
                         });
                         eJobSelectOptions.appendChild(optionEl);
@@ -272,7 +329,7 @@
             }
         };
 
-        const fetchDataForDate = async (checkinDate, jobId) => {
+        const fetchDataForDate = async (checkinDate, jobId, fitBounds = true) => {
             eMapLoader.classList.remove('hidden');
             closeSidebar();
 
@@ -287,27 +344,35 @@
                 const data = await response.json();
                 
                 markersLayer.clearLayers();
-                eListingSidebarContent.innerHTML = ''; // Limpa a lista antiga
+                eListingSidebarContent.innerHTML = ''; 
+                currentLocations = [];
+
                 const locationsWithData = data.filter(item => item.latitude && item.longitude);
 
                 if (locationsWithData.length > 0) {
                     const markerBounds = [];
                     locationsWithData.forEach(item => {
-                        // Adiciona marcador no mapa
                         const marker = L.marker([item.latitude, item.longitude]);
-                        marker.on('click', function (e) {
+                        
+                        item.marker = marker; // Associate marker with data
+                        currentLocations.push(item);
+
+                        marker.on('click', (e) => {
                             L.DomEvent.stopPropagation(e);
-                            openSidebar(item);
-                            map.panTo(this.getLatLng());
+                            selectItem(item);
                         });
                         markersLayer.addLayer(marker);
                         markerBounds.push([item.latitude, item.longitude]);
 
-                        // Adiciona item na lista da sidebar direita
                         const listItem = document.createElement('div');
-                        listItem.className = 'p-2 rounded-lg border cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all';
+                        let baseClasses = 'p-2 rounded-lg border cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all';
+                        if (item.tagged) {
+                            baseClasses += ' tagged-highlight';
+                        }
+                        listItem.className = baseClasses;
                         listItem.innerHTML = `
                             <h4 class="font-semibold text-gray-800 text-xs truncate">${item.title}</h4>
+                            <p class="text-gray-500 text-xs truncate mt-1">${item.name || ''}</p>
                             <div class="flex justify-between items-center mt-2">
                                 <div class="flex items-center gap-3 text-gray-500">
                                     <span class="material-symbols-outlined text-base ${item.favorite ? 'text-red-400' : 'text-gray-300'}" title="Favorito">favorite</span>
@@ -318,15 +383,19 @@
                             </div>
                         `;
                         listItem.addEventListener('click', () => {
-                            openSidebar(item);
-                            map.panTo([item.latitude, item.longitude]);
+                            selectItem(item);
                         });
                         eListingSidebarContent.appendChild(listItem);
                     });
-                    map.fitBounds(markerBounds, { padding: [50, 50] });
+                    
+                    if (fitBounds) {
+                        map.fitBounds(markerBounds, { padding: [50, 50] });
+                    }
                 } else {
                     eListingSidebarContent.innerHTML = '<p class="text-center text-gray-500 mt-8">Nenhuma acomodação encontrada.</p>';
-                    map.setView([-14.2350, -51.9253], 4);
+                    if (fitBounds) {
+                        map.setView([-14.2350, -51.9253], 4);
+                    }
                 }
 
             } catch (error) {
@@ -340,28 +409,24 @@
 
         const handleDateChange = () => {
             const newDate = eCalendar.value;
-            fetchDataForDate(newDate, selectedJobId);
+            fetchDataForDate(newDate, selectedJobId, false);
             updateViewJobLink();
         };
 
         eCalendar.addEventListener('change', handleDateChange);
-        
-        document.addEventListener('keydown', (event) => {
-            if (document.activeElement === eCalendar) return;
-            
+
+        ePrevDayBtn.addEventListener('click', () => {
             const currentDate = new Date(eCalendar.value + 'T00:00:00');
-            let dateChanged = false;
-            if (event.key === 'ArrowLeft') {
-                currentDate.setDate(currentDate.getDate() - 1);
-                dateChanged = true;
-            } else if (event.key === 'ArrowRight') {
-                currentDate.setDate(currentDate.getDate() + 1);
-                dateChanged = true;
-            }
-            if (dateChanged) {
-                eCalendar.value = currentDate.toISOString().split('T')[0];
-                handleDateChange();
-            }
+            currentDate.setDate(currentDate.getDate() - 1);
+            eCalendar.value = currentDate.toISOString().split('T')[0];
+            handleDateChange();
+        });
+
+        eNextDayBtn.addEventListener('click', () => {
+            const currentDate = new Date(eCalendar.value + 'T00:00:00');
+            currentDate.setDate(currentDate.getDate() + 1);
+            eCalendar.value = currentDate.toISOString().split('T')[0];
+            handleDateChange();
         });
 
         const initializeApp = async () => {
@@ -380,7 +445,7 @@
 
             const initialJobId = await populateJobSelect();
             if(initialJobId) {
-                fetchDataForDate(tomorrowFormatted, initialJobId);
+                fetchDataForDate(tomorrowFormatted, initialJobId, true);
                 updateViewJobLink();
             }
         };

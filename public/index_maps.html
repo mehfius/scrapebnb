@@ -40,19 +40,15 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        select, input[type="date"] {
-            -webkit-appearance: none; -moz-appearance: none; appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708 .708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 16px 12px;
-            padding-right: 2.5rem;
-        }
         #sidebar {
             transition: transform 0.3s ease-in-out;
         }
         #sidebar.is-open {
             transform: translateX(0);
+        }
+        /* Custom Dropdown */
+        .custom-select-options {
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
     </style>
 </head>
@@ -104,6 +100,7 @@
         let map = null;
         let markersLayer = null;
         let jobs = [];
+        let selectedJobId = null;
 
         const createElement = (tag, options = {}) => {
             const el = document.createElement(tag);
@@ -112,13 +109,12 @@
             if (options.innerHTML) el.innerHTML = options.innerHTML;
             if (options.type) el.type = options.type;
             if (options.value) el.value = options.value;
+            if (options.dataset) {
+                for (const key in options.dataset) {
+                    el.dataset[key] = options.dataset[key];
+                }
+            }
             return el;
-        };
-
-        const createSelectOption = (value, text) => {
-            const opt = createElement('option', { innerHTML: text });
-            opt.value = value;
-            return opt;
         };
 
         const today = new Date();
@@ -132,13 +128,42 @@
         eLogo.src = 'https://scrapebnb.vercel.app/img/scrapebnb.jpg';
         const airbnb = createElement('a', { innerHTML: 'Ver no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap` });
         const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses} w-full` });
-        const eJobSelect = createElement('select', { id: 'job-select', className: `${baseInputClasses} w-96` });
+        
+        // --- Custom Select Component ---
+        const eJobSelectContainer = createElement('div', { id: 'job-select-container', className: 'relative' });
+        const eJobSelectButton = createElement('button', { id: 'job-select-button', className: `${baseInputClasses} flex items-center justify-between text-left w-auto` });
+        const eJobSelectButtonText = createElement('span', { innerHTML: 'Carregando jobs...' });
+        const eJobSelectButtonIcon = createElement('span', { className: 'material-symbols-outlined text-gray-500 ml-2', innerHTML: 'expand_more' });
+        eJobSelectButton.append(eJobSelectButtonText, eJobSelectButtonIcon);
+
+        const eJobSelectOptions = createElement('div', { id: 'job-select-options', className: 'custom-select-options absolute mt-1 w-max max-w-md bg-white border border-gray-300 rounded-lg shadow-lg z-50 opacity-0 transform scale-95 pointer-events-none' });
+        eJobSelectContainer.append(eJobSelectButton, eJobSelectOptions);
+
+        eJobSelectButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = eJobSelectOptions.classList.contains('opacity-100');
+            if (isOpen) {
+                eJobSelectOptions.classList.remove('opacity-100', 'scale-100');
+                eJobSelectOptions.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+            } else {
+                eJobSelectOptions.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+                eJobSelectOptions.classList.add('opacity-100', 'scale-100');
+            }
+        });
+
+        window.addEventListener('click', () => {
+             if (eJobSelectOptions.classList.contains('opacity-100')) {
+                eJobSelectOptions.classList.remove('opacity-100', 'scale-100');
+                eJobSelectOptions.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+            }
+        });
+        // --- End Custom Select ---
         
         const eHeaderLeft = createElement('div', { className: 'flex items-center gap-4' });
         const eHeaderRight = createElement('div', { className: 'flex items-center gap-2' });
 
         eHeaderLeft.append(eLogo, airbnb);
-        eHeaderRight.append(eCalendar, eJobSelect);
+        eHeaderRight.append(eCalendar, eJobSelectContainer);
         eHeader.append(eHeaderLeft, eHeaderRight);
 
         const closeSidebar = () => {
@@ -185,7 +210,6 @@
         };
 
         const updateViewJobLink = () => {
-            const selectedJobId = eJobSelect.value;
             const job = jobs.find(j => j.id == selectedJobId);
             if (job) {
                 const checkinDateString = eCalendar.value;
@@ -211,7 +235,7 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 jobs = await response.json();
                 
-                eJobSelect.innerHTML = '';
+                eJobSelectOptions.innerHTML = '';
                 let latestJobId = null;
 
                 if (jobs.length > 0) {
@@ -220,13 +244,30 @@
 
                     jobs.forEach(job => {
                         const label = `${job.id} | ${job.label || 'N/A'} | Adultos: ${job.adults || 'N/A'} | Quartos: ${job.min_bedrooms || 'N/A'}`;
-                        eJobSelect.appendChild(createSelectOption(job.id, label));
+                        const optionEl = createElement('a', { 
+                            className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer',
+                            innerHTML: label,
+                            dataset: { value: job.id }
+                        });
+                        optionEl.addEventListener('click', () => {
+                            selectedJobId = job.id;
+                            eJobSelectButtonText.innerHTML = label;
+                            fetchDataForDate(eCalendar.value, selectedJobId);
+                            updateViewJobLink();
+                        });
+                        eJobSelectOptions.appendChild(optionEl);
                     });
-                    eJobSelect.value = latestJobId;
+                    
+                    selectedJobId = latestJobId;
+                    const selectedJob = jobs.find(j => j.id == selectedJobId);
+                    eJobSelectButtonText.innerHTML = `${selectedJob.id} | ${selectedJob.label || 'N/A'} | Adultos: ${selectedJob.adults || 'N/A'} | Quartos: ${selectedJob.min_bedrooms || 'N/A'}`;
+                } else {
+                    eJobSelectButtonText.innerHTML = 'Nenhum job encontrado';
                 }
                 return latestJobId;
             } catch (error) {
                 console.error("Failed to populate jobs:", error);
+                eJobSelectButtonText.innerHTML = 'Erro ao carregar jobs';
                 return null;
             }
         };
@@ -299,18 +340,14 @@
 
         const handleDateChange = () => {
             const newDate = eCalendar.value;
-            fetchDataForDate(newDate, eJobSelect.value);
+            fetchDataForDate(newDate, selectedJobId);
             updateViewJobLink();
         };
 
         eCalendar.addEventListener('change', handleDateChange);
-        eJobSelect.addEventListener('change', () => {
-            fetchDataForDate(eCalendar.value, eJobSelect.value);
-            updateViewJobLink();
-        });
-
+        
         document.addEventListener('keydown', (event) => {
-            if (document.activeElement === eCalendar || document.activeElement === eJobSelect) return;
+            if (document.activeElement === eCalendar) return;
             
             const currentDate = new Date(eCalendar.value + 'T00:00:00');
             let dateChanged = false;
@@ -342,8 +379,10 @@
             map.on('click', closeSidebar);
 
             const initialJobId = await populateJobSelect();
-            fetchDataForDate(tomorrowFormatted, initialJobId);
-            updateViewJobLink();
+            if(initialJobId) {
+                fetchDataForDate(tomorrowFormatted, initialJobId);
+                updateViewJobLink();
+            }
         };
 
         initializeApp();

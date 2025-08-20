@@ -124,10 +124,10 @@
 
         const baseInputClasses = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5';
         
-        const eLogo = createElement('img', { className: 'h-8 w-auto' });
+        const eLogo = createElement('img', { className: 'w-[200px] h-auto' });
         eLogo.src = 'https://scrapebnb.vercel.app/img/scrapebnb.jpg';
         const airbnb = createElement('a', { innerHTML: 'Ver no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap` });
-        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses} w-full` });
+        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses} w-[200px]` });
         
         // --- Custom Select Component ---
         const eJobSelectContainer = createElement('div', { id: 'job-select-container', className: 'relative' });
@@ -160,11 +160,11 @@
         // --- End Custom Select ---
         
         const eHeaderLeft = createElement('div', { className: 'flex items-center gap-4' });
-        const eHeaderRight = createElement('div', { className: 'flex items-center gap-2' });
+        const eHeaderCenter = createElement('div', { className: 'flex items-center gap-2' });
 
-        eHeaderLeft.append(eLogo, airbnb);
-        eHeaderRight.append(eCalendar, eJobSelectContainer);
-        eHeader.append(eHeaderLeft, eHeaderRight);
+        eHeaderLeft.append(eLogo);
+        eHeaderCenter.append(eCalendar, eJobSelectContainer);
+        eHeader.append(eHeaderLeft, eHeaderCenter, airbnb);
 
         const closeSidebar = () => {
             eSidebar.classList.remove('is-open');

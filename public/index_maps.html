@@ -10,7 +10,7 @@
     
     <!-- Google Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
@@ -46,7 +46,7 @@
         }
         select, input[type="date"] {
             -webkit-appearance: none; -moz-appearance: none; appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708 .708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 0.75rem center;
             background-size: 16px 12px;
@@ -56,20 +56,27 @@
             border-radius: 0.75rem; /* 12px */
             padding: 0;
             overflow: hidden;
+            background: transparent;
+            box-shadow: none;
         }
         .leaflet-popup-content {
             margin: 0;
             width: 256px !important; /* 16rem */
+            height: 160px !important; /* 10rem */
         }
-        .leaflet-popup-tip-container {
-            display: none; /* Hide default popup arrow */
+        .leaflet-marker-icon {
+            cursor: pointer;
+        }
+        .leaflet-popup-close-button {
+            color: white !important;
+            padding: 8px 8px 0 0 !important;
         }
     </style>
 </head>
 <body>
 
     <!-- Header Section -->
-    <header id="app-header" class="bg-white shadow-md p-4 z-10 flex flex-wrap items-center justify-between gap-4">
+    <header id="app-header" class="bg-white shadow-md p-4 z-10 flex items-center justify-between gap-4">
         <!-- Header controls will be injected here by JavaScript -->
     </header>
 
@@ -92,6 +99,19 @@
         // --- Map Variables ---
         let map = null;
         let markersLayer = null;
+
+        // --- Custom Map Icons ---
+        const createMarkerIcon = (color) => {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="marker"><path fill-opacity=".25" d="M16 32s1.427-9.585 3.761-12.025c4.3-4.5 8.239-8.239 8.239-14.475a12 12 0 10-24 0c0 6.236 3.939 9.975 8.239 14.475C14.573 22.415 16 32 16 32z"/><path fill="${color}" d="M16 0a10 10 0 100 20 10 10 0 000-20zm0 15a5 5 0 110-10 5 5 0 010 10z"/></svg>`;
+            return L.icon({
+                iconUrl: `data:image/svg+xml;base64,${btoa(svg)}`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+        };
+        const defaultIcon = createMarkerIcon('#3b82f6'); // blue-500
+        const hoverIcon = createMarkerIcon('#ef4444'); // red-500
 
         // --- Element Creation ---
         const createElement = (tag, options = {}) => {
@@ -119,15 +139,20 @@
         const baseInputClasses = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5';
         const baseButtonClasses = 'cursor-pointer p-2.5 rounded-lg hover:bg-gray-100 transition-colors';
 
-        const eDateLabel = createElement('label', { className: 'font-semibold text-lg whitespace-nowrap order-1 sm:order-1' });
-        const eRooms = createElement('button', { innerHTML: 'holiday_village', className: `material-symbols-outlined ${baseButtonClasses} order-2 sm:order-2` });
-        const airbnb = createElement('a', { innerHTML: 'Ver Anúncio no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap order-3 sm:order-3` });
-        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses} order-4 sm:order-4` });
-        const eJobSelect = createElement('select', { id: 'job-select', className: `${baseInputClasses} order-5 sm:order-5` });
-        const eSortSelect = createElement('select', { id: 'sort-select', className: `${baseInputClasses} order-6 sm:order-6` });
-        const eConfigJob = createElement('button', { innerHTML: 'settings', className: `material-symbols-outlined ${baseButtonClasses} order-7 sm:order-7` });
+        const eDateLabel = createElement('label', { className: 'font-semibold text-lg whitespace-nowrap' });
+        const eRooms = createElement('button', { innerHTML: 'holiday_village', className: `material-symbols-outlined ${baseButtonClasses}` });
+        const airbnb = createElement('a', { innerHTML: 'Ver no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap` });
+        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses}` });
+        const eJobSelect = createElement('select', { id: 'job-select', className: `${baseInputClasses}` });
+        const eSortSelect = createElement('select', { id: 'sort-select', className: `${baseInputClasses}` });
         
-        eHeader.append(eDateLabel, eRooms, airbnb, eCalendar, eJobSelect, eSortSelect, eConfigJob);
+        const eHeaderLeft = createElement('div', { className: 'flex items-center gap-4' });
+        const eHeaderRight = createElement('div', { className: 'flex items-center gap-2' });
+
+        eHeaderLeft.append(eDateLabel, eRooms, airbnb);
+        eHeaderRight.append(eCalendar, eJobSelect, eSortSelect);
+
+        eHeader.append(eHeaderLeft, eHeaderRight);
 
         const sortOptions = [
             { value: 'position', label: 'Ordernar por Posição' },
@@ -210,25 +235,33 @@
                 if (locationsWithData.length > 0) {
                     const markerBounds = [];
                     locationsWithData.forEach(item => {
-                        const marker = L.marker([item.latitude, item.longitude]);
+                        const marker = L.marker([item.latitude, item.longitude], { icon: defaultIcon });
                         
                         const imageUrl = (item.room_image_array && item.room_image_array.length > 0) ? item.room_image_array[0] : item.host_image;
                         const price = item.average_price_per_night ? `R$ ${item.average_price_per_night}` : 'N/A';
                         
                         const popupContent = `
-                            <div class="w-64">
-                                <img src="${imageUrl}" class="w-full h-32 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/ffffff?text=Imagem';">
-                                <div class="p-3">
-                                    <h3 class="font-bold text-sm truncate" title="${item.title}">${item.title}</h3>
-                                    <p class="text-md font-semibold mt-1">${price}</p>
+                            <div class="relative w-64 h-40 text-white rounded-lg overflow-hidden shadow-lg">
+                                <img src="${imageUrl}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/256x160/cccccc/ffffff?text=Imagem';">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-3">
+                                    <h3 class="font-bold text-sm whitespace-normal leading-tight">${item.title}</h3>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <p class="text-md font-semibold">${price}</p>
+                                        <div class="flex space-x-1.5">
+                                            <span class="material-symbols-outlined text-lg ${item.favorite ? 'text-red-400' : 'text-white/50'}" title="Favorito">favorite</span>
+                                            <span class="material-symbols-outlined text-lg ${item.superhost ? 'text-yellow-400' : 'text-white/50'}" title="Superhost">star</span>
+                                            <span class="material-symbols-outlined text-lg ${item.gold ? 'text-amber-300' : 'text-white/50'}" title="Selo Gold">beenhere</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         `;
                         
-                        marker.bindPopup(popupContent);
+                        marker.bindPopup(popupContent, { closeButton: true });
                         
-                        marker.on('mouseover', function () { this.openPopup(); });
-                        marker.on('mouseout', function () { this.closePopup(); });
+                        marker.on('mouseover', function () { this.setIcon(hoverIcon); });
+                        marker.on('mouseout', function () { this.setIcon(defaultIcon); });
+                        marker.on('click', function () { this.openPopup(); });
 
                         markersLayer.addLayer(marker);
                         markerBounds.push([item.latitude, item.longitude]);
@@ -263,7 +296,6 @@
         });
 
         eRooms.addEventListener('click', () => console.log("Rooms button clicked."));
-        eConfigJob.addEventListener('click', () => console.log("Config Job button clicked."));
 
         document.addEventListener('keydown', (event) => {
             if (document.activeElement === eCalendar || document.activeElement === eJobSelect || document.activeElement === eSortSelect) return;

@@ -68,7 +68,7 @@
     </header>
 
     <div class="relative flex-grow min-h-0">
-        <aside id="sidebar" class="absolute top-0 left-0 h-full w-96 bg-white shadow-lg transform -translate-x-full z-30 overflow-y-auto">
+        <aside id="sidebar" class="absolute top-0 right-48 h-full w-96 bg-white shadow-lg transform translate-x-full z-30 overflow-y-auto">
             <div id="sidebar-content" class="p-6">
                 <div class="text-center text-gray-500 mt-8">
                     <span class="material-symbols-outlined text-6xl">real_estate_agent</span>
@@ -211,7 +211,20 @@
                 }
             });
             openSidebar(selectedItem);
-            map.panTo([selectedItem.latitude, selectedItem.longitude]);
+
+            const listingSidebarWidth = 192; // w-48
+            const detailsSidebarWidth = 384; // w-96
+            const totalSidebarWidth = listingSidebarWidth + detailsSidebarWidth;
+
+            const markerBounds = L.latLng(selectedItem.latitude, selectedItem.longitude).toBounds(1);
+
+            map.flyToBounds(markerBounds, {
+                paddingTopLeft: [0, 0],
+                paddingBottomRight: [totalSidebarWidth, 0],
+                animate: true,
+                duration: 1.0,
+                maxZoom: map.getZoom()
+            });
         };
 
         const openSidebar = (item) => {

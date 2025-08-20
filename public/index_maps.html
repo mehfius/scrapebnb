@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha26-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script src="https://scrapebnb.vercel.app/js/supabase_auth_airbnb.js"></script>
@@ -46,20 +46,16 @@
         #sidebar.is-open {
             transform: translateX(0);
         }
-        /* Custom Dropdown */
         .custom-select-options {
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
-        /* Marker Opacity Transition */
         .leaflet-marker-icon {
             transition: opacity 0.3s ease-in-out;
         }
-        /* Tagged Highlight Style */
         .tagged-highlight {
             border-color: #facc15; /* Tailwind amber-400 */
             box-shadow: 0 0 8px 2px rgba(250, 204, 21, 0.6);
         }
-         /* Remove arrow from date input */
         input[type="date"]::-webkit-calendar-picker-indicator {
             display: none;
             -webkit-appearance: none;
@@ -72,7 +68,6 @@
     </header>
 
     <div class="relative flex-grow min-h-0">
-        <!-- Sidebar de Detalhes (Esquerda) -->
         <aside id="sidebar" class="absolute top-0 left-0 h-full w-96 bg-white shadow-lg transform -translate-x-full z-30 overflow-y-auto">
             <div id="sidebar-content" class="p-6">
                 <div class="text-center text-gray-500 mt-8">
@@ -82,7 +77,6 @@
             </div>
         </aside>
 
-        <!-- Container do Mapa -->
         <main id="map-container" class="relative h-full w-full">
             <div id="map" class="z-10"></div>
             <div id="map-loader" class="hidden absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-20">
@@ -93,13 +87,11 @@
             </div>
         </main>
 
-        <!-- Sidebar de Listagem (Direita) -->
         <aside id="listing-sidebar" class="absolute top-0 right-0 h-full w-48 bg-white shadow-lg z-30 overflow-y-auto">
             <div class="p-4 border-b">
                  <h2 class="text-xl font-bold text-gray-800">Acomodações</h2>
             </div>
             <div id="listing-sidebar-content" class="p-2 space-y-2">
-                <!-- A lista de acomodações será injetada aqui -->
             </div>
         </aside>
     </div>
@@ -115,18 +107,17 @@
         let markersLayer = null;
         let jobs = [];
         let selectedJobId = null;
-        let currentLocations = []; // Array to hold current location data with markers
+        let currentLocations = [];
 
-        // --- Configure small default marker ---
         delete L.Icon.Default.prototype._getIconUrl;
         L.Icon.Default.mergeOptions({
             iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
             iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
             shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-            iconSize:    [13, 21],
-            iconAnchor:  [6, 21],
+            iconSize:     [13, 21],
+            iconAnchor:   [6, 21],
             popupAnchor: [1, -20],
-            shadowSize:  [21, 21]
+            shadowSize:   [21, 21]
         });
 
 
@@ -156,17 +147,14 @@
         eLogo.src = 'https://scrapebnb.vercel.app/img/scrapebnb.jpg';
         const airbnb = createElement('a', { innerHTML: 'Ver no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap` });
         
-        // --- Date Control Component ---
-        const eDateControlContainer = createElement('div', { className: 'flex items-center' });
-        const ePrevDayBtn = createElement('button', { id: 'prev-day-btn', className: 'p-2.5 rounded-l-lg bg-gray-50 border border-r-0 border-gray-300 hover:bg-gray-100 transition-colors' });
+        const eDateControlContainer = createElement('div', { className: 'flex items-center border border-gray-300 rounded-lg overflow-hidden' });
+        const ePrevDayBtn = createElement('button', { id: 'prev-day-btn', className: 'py-[9px] px-2.5 bg-gray-50 hover:bg-gray-100 transition-colors border-r border-gray-300' });
         ePrevDayBtn.innerHTML = `<span class="material-symbols-outlined text-gray-600 text-base">chevron_left</span>`;
-        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `bg-gray-50 border-t border-b border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-[150px]` });
-        const eNextDayBtn = createElement('button', { id: 'next-day-btn', className: 'p-2.5 rounded-r-lg bg-gray-50 border border-l-0 border-gray-300 hover:bg-gray-100 transition-colors' });
+        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `bg-gray-50 text-gray-900 text-sm focus:ring-0 block p-2.5 w-[150px]` });
+        const eNextDayBtn = createElement('button', { id: 'next-day-btn', className: 'py-[9px] px-2.5 bg-gray-50 hover:bg-gray-100 transition-colors border-l border-gray-300' });
         eNextDayBtn.innerHTML = `<span class="material-symbols-outlined text-gray-600 text-base">chevron_right</span>`;
         eDateControlContainer.append(ePrevDayBtn, eCalendar, eNextDayBtn);
-        // --- End Date Control ---
 
-        // --- Custom Select Component ---
         const eJobSelectContainer = createElement('div', { id: 'job-select-container', className: 'relative' });
         const eJobSelectButton = createElement('button', { id: 'job-select-button', className: `${baseInputClasses} flex items-center justify-between text-left w-auto rounded-lg` });
         const eJobSelectButtonText = createElement('span', { innerHTML: 'Carregando jobs...' });
@@ -194,7 +182,6 @@
                 eJobSelectOptions.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
             }
         });
-        // --- End Custom Select ---
         
         const eHeaderLeft = createElement('div', { className: 'flex items-center gap-4' });
         const eHeaderCenter = createElement('div', { className: 'flex items-center gap-2' });
@@ -244,16 +231,16 @@
                     <p class="text-2xl font-semibold text-gray-800">${price} <span class="text-base font-normal text-gray-600">/ noite</span></p>
                     <div class="flex justify-start items-center gap-6 text-gray-600 border-t pt-4">
                          <div class="flex items-center gap-1.5" title="Favorito">
-                            <span class="material-symbols-outlined text-lg ${item.favorite ? 'text-red-500' : 'text-gray-400'}">favorite</span>
-                            <span class="text-sm font-medium">Favorito</span>
+                             <span class="material-symbols-outlined text-lg ${item.favorite ? 'text-red-500' : 'text-gray-400'}">favorite</span>
+                             <span class="text-sm font-medium">Favorito</span>
                          </div>
                          <div class="flex items-center gap-1.5" title="Superhost">
-                            <span class="material-symbols-outlined text-lg ${item.superhost ? 'text-yellow-500' : 'text-gray-400'}">star</span>
-                            <span class="text-sm font-medium">Superhost</span>
+                             <span class="material-symbols-outlined text-lg ${item.superhost ? 'text-yellow-500' : 'text-gray-400'}">star</span>
+                             <span class="text-sm font-medium">Superhost</span>
                          </div>
                          <div class="flex items-center gap-1.5" title="Selo Gold">
-                            <span class="material-symbols-outlined text-lg ${item.gold ? 'text-amber-400' : 'text-gray-400'}">beenhere</span>
-                            <span class="text-sm font-medium">Gold</span>
+                             <span class="material-symbols-outlined text-lg ${item.gold ? 'text-amber-400' : 'text-gray-400'}">beenhere</span>
+                             <span class="text-sm font-medium">Gold</span>
                          </div>
                     </div>
                     <a href="https://www.airbnb.com.br/rooms/${item.room}" target="_blank" class="block w-full text-center bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-all duration-300 shadow-lg hover:shadow-xl mt-2">Ver no Airbnb</a>
@@ -354,7 +341,7 @@
                     locationsWithData.forEach(item => {
                         const marker = L.marker([item.latitude, item.longitude]);
                         
-                        item.marker = marker; // Associate marker with data
+                        item.marker = marker;
                         currentLocations.push(item);
 
                         marker.on('click', (e) => {

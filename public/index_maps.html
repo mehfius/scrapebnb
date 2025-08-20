@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha26-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script src="https://scrapebnb.vercel.app/js/supabase_auth_airbnb.js"></script>
@@ -62,6 +62,7 @@
     </header>
 
     <div class="relative flex-grow min-h-0">
+        <!-- Sidebar de Detalhes (Esquerda) -->
         <aside id="sidebar" class="absolute top-0 left-0 h-full w-96 bg-white shadow-lg transform -translate-x-full z-30 overflow-y-auto">
             <div id="sidebar-content" class="p-6">
                 <div class="text-center text-gray-500 mt-8">
@@ -71,6 +72,7 @@
             </div>
         </aside>
 
+        <!-- Container do Mapa -->
         <main id="map-container" class="relative h-full w-full">
             <div id="map" class="z-10"></div>
             <div id="map-loader" class="hidden absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-20">
@@ -80,6 +82,16 @@
                 </div>
             </div>
         </main>
+
+        <!-- Sidebar de Listagem (Direita) -->
+        <aside id="listing-sidebar" class="absolute top-0 right-0 h-full w-48 bg-white shadow-lg z-30 overflow-y-auto">
+            <div class="p-4 border-b">
+                 <h2 class="text-xl font-bold text-gray-800">Acomodações</h2>
+            </div>
+            <div id="listing-sidebar-content" class="p-4 space-y-3">
+                <!-- A lista de acomodações será injetada aqui -->
+            </div>
+        </aside>
     </div>
 
     <script type="module">
@@ -87,6 +99,7 @@
         const eMapLoader = document.getElementById('map-loader');
         const eSidebar = document.getElementById('sidebar');
         const eSidebarContent = document.getElementById('sidebar-content');
+        const eListingSidebarContent = document.getElementById('listing-sidebar-content');
         
         let map = null;
         let markersLayer = null;
@@ -113,28 +126,19 @@
         tomorrow.setDate(today.getDate() + 1);
         const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
 
-        const baseInputClasses = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5';
-        const baseButtonClasses = 'cursor-pointer p-2.5 rounded-lg hover:bg-gray-100 transition-colors';
-
+        const baseInputClasses = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5';
+        
         const eDateLabel = createElement('label', { className: 'font-semibold text-lg whitespace-nowrap' });
-        const eRooms = createElement('button', { innerHTML: 'holiday_village', className: `material-symbols-outlined ${baseButtonClasses}` });
         const airbnb = createElement('a', { innerHTML: 'Ver no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap` });
-        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses}` });
-        const eJobSelect = createElement('select', { id: 'job-select', className: `${baseInputClasses}` });
-        const eSortSelect = createElement('select', { id: 'sort-select', className: `${baseInputClasses}` });
+        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses} w-full` });
+        const eJobSelect = createElement('select', { id: 'job-select', className: `${baseInputClasses} w-96` });
         
         const eHeaderLeft = createElement('div', { className: 'flex items-center gap-4' });
         const eHeaderRight = createElement('div', { className: 'flex items-center gap-2' });
 
-        eHeaderLeft.append(eDateLabel, eRooms, airbnb);
-        eHeaderRight.append(eCalendar, eJobSelect, eSortSelect);
+        eHeaderLeft.append(eDateLabel, airbnb);
+        eHeaderRight.append(eCalendar, eJobSelect);
         eHeader.append(eHeaderLeft, eHeaderRight);
-
-        const sortOptions = [
-            { value: 'position', label: 'Ordernar por Posição' },
-            { value: 'price', label: 'Ordernar por Preço' }
-        ];
-        sortOptions.forEach(option => eSortSelect.appendChild(createSelectOption(option.value, option.label)));
 
         const closeSidebar = () => {
             eSidebar.classList.remove('is-open');
@@ -232,13 +236,12 @@
             }
         };
 
-        const fetchDataForDate = async (checkinDate, jobId, sortBy) => {
+        const fetchDataForDate = async (checkinDate, jobId) => {
             eMapLoader.classList.remove('hidden');
             closeSidebar();
 
-            let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,gold,room_image_array,position,title,host_image,favorite,superhost,reference_label,average_price_per_night,tagged,latitude,longitude&checkin=eq.${checkinDate}&limit=200`;
+            let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,gold,room_image_array,position,title,host_image,favorite,superhost,reference_label,average_price_per_night,tagged,latitude,longitude&checkin=eq.${checkinDate}&limit=200&order=position`;
             if (jobId) url += `&job=eq.${jobId}`;
-            url += sortBy === 'price' ? `&order=average_price_per_night` : `&order=position`;
 
             try {
                 const response = await fetch(url, {
@@ -248,30 +251,52 @@
                 const data = await response.json();
                 
                 markersLayer.clearLayers();
+                eListingSidebarContent.innerHTML = ''; // Limpa a lista antiga
                 const locationsWithData = data.filter(item => item.latitude && item.longitude);
 
                 if (locationsWithData.length > 0) {
                     const markerBounds = [];
                     locationsWithData.forEach(item => {
+                        // Adiciona marcador no mapa
                         const marker = L.marker([item.latitude, item.longitude]);
-                        
                         marker.on('click', function (e) {
                             L.DomEvent.stopPropagation(e);
                             openSidebar(item);
                             map.panTo(this.getLatLng());
                         });
-
                         markersLayer.addLayer(marker);
                         markerBounds.push([item.latitude, item.longitude]);
+
+                        // Adiciona item na lista da sidebar direita
+                        const listItem = document.createElement('div');
+                        listItem.className = 'p-3 rounded-lg border cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all';
+                        listItem.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-semibold text-gray-800 text-sm flex-grow pr-2">${item.title}</h4>
+                                <p class="font-bold text-gray-900 text-md whitespace-nowrap">R$ ${item.average_price_per_night || 'N/A'}</p>
+                            </div>
+                            <div class="flex items-center gap-4 mt-2 text-gray-500">
+                                <span class="material-symbols-outlined text-lg ${item.favorite ? 'text-red-400' : 'text-gray-300'}" title="Favorito">favorite</span>
+                                <span class="material-symbols-outlined text-lg ${item.superhost ? 'text-yellow-400' : 'text-gray-300'}" title="Superhost">star</span>
+                                <span class="material-symbols-outlined text-lg ${item.gold ? 'text-amber-300' : 'text-gray-300'}" title="Selo Gold">beenhere</span>
+                            </div>
+                        `;
+                        listItem.addEventListener('click', () => {
+                            openSidebar(item);
+                            map.panTo([item.latitude, item.longitude]);
+                        });
+                        eListingSidebarContent.appendChild(listItem);
                     });
                     map.fitBounds(markerBounds, { padding: [50, 50] });
                 } else {
+                    eListingSidebarContent.innerHTML = '<p class="text-center text-gray-500 mt-8">Nenhuma acomodação encontrada.</p>';
                     map.setView([-14.2350, -51.9253], 4);
                 }
 
             } catch (error) {
                 console.error("Failed to fetch data:", error);
                 markersLayer.clearLayers();
+                eListingSidebarContent.innerHTML = '<p class="text-center text-red-500 mt-8">Erro ao carregar dados.</p>';
             } finally {
                 eMapLoader.classList.add('hidden');
             }
@@ -279,24 +304,19 @@
 
         const handleDateChange = () => {
             const newDate = eCalendar.value;
-            fetchDataForDate(newDate, eJobSelect.value, eSortSelect.value);
+            fetchDataForDate(newDate, eJobSelect.value);
             updateViewJobLink();
             updateDateLabel(newDate);
         };
 
         eCalendar.addEventListener('change', handleDateChange);
         eJobSelect.addEventListener('change', () => {
-            fetchDataForDate(eCalendar.value, eJobSelect.value, eSortSelect.value);
+            fetchDataForDate(eCalendar.value, eJobSelect.value);
             updateViewJobLink();
         });
-        eSortSelect.addEventListener('change', () => {
-            fetchDataForDate(eCalendar.value, eJobSelect.value, eSortSelect.value);
-        });
-
-        eRooms.addEventListener('click', () => console.log("Rooms button clicked."));
 
         document.addEventListener('keydown', (event) => {
-            if (document.activeElement === eCalendar || document.activeElement === eJobSelect || document.activeElement === eSortSelect) return;
+            if (document.activeElement === eCalendar || document.activeElement === eJobSelect) return;
             
             const currentDate = new Date(eCalendar.value + 'T00:00:00');
             let dateChanged = false;
@@ -328,7 +348,7 @@
             map.on('click', closeSidebar);
 
             const initialJobId = await populateJobSelect();
-            fetchDataForDate(tomorrowFormatted, initialJobId, eSortSelect.value);
+            fetchDataForDate(tomorrowFormatted, initialJobId);
             updateViewJobLink();
             updateDateLabel(tomorrowFormatted);
         };

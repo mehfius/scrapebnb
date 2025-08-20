@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Anúncios</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <!-- External Supabase Auth Script -->
+    <script src="https://scrapebnb.vercel.app/js/supabase_auth_airbnb.js"></script>
+
+    <style>
+        /* Custom styles for a better look and feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom styles for select elements to match the theme */
+        select, input[type="date"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            padding-right: 2.5rem;
+        }
+        /* Style for the tagged items */
+        .item[tagged] {
+            border: 2px solid #fbbf24; /* amber-400 */
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+        /* Icon boolean styles */
+        .icon-true { color: #ef4444; } /* red-500 */
+        .icon-false { color: #d1d5db; } /* gray-300 */
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header Section -->
+    <header id="app-header" class="bg-white shadow-md p-4 sticky top-0 z-10 flex flex-wrap items-center justify-between gap-4">
+        <!-- Header controls will be injected here by JavaScript -->
+    </header>
+
+    <!-- Main Content Grid -->
+    <main id="app-content" class="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+        <!-- Data items will be injected here -->
+    </main>
+
+    <script type="module">
+        // --- DOM Elements ---
+        const eHeader = document.getElementById('app-header');
+        const eContent = document.getElementById('app-content');
+        
+        // --- Element Creation ---
+        const createElement = (tag, options = {}) => {
+            const el = document.createElement(tag);
+            if (options.id) el.id = options.id;
+            if (options.className) el.className = options.className;
+            if (options.innerHTML) el.innerHTML = options.innerHTML;
+            if (options.type) el.type = options.type;
+            if (options.value) el.value = options.value;
+            Object.keys(options.dataset || {}).forEach(key => el.dataset[key] = options.dataset[key]);
+            return el;
+        };
+
+        const createSelectOption = (value, text) => {
+            const opt = createElement('option', { innerHTML: text });
+            opt.value = value;
+            return opt;
+        };
+
+        // --- UI Initialization ---
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
+
+        const baseInputClasses = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5';
+        const baseButtonClasses = 'cursor-pointer p-2.5 rounded-lg hover:bg-gray-100 transition-colors';
+
+        const eDateLabel = createElement('label', { className: 'font-semibold text-lg whitespace-nowrap order-1 sm:order-1' });
+        const eRooms = createElement('button', { innerHTML: 'holiday_village', className: `material-symbols-outlined ${baseButtonClasses} order-2 sm:order-2` });
+        const airbnb = createElement('a', { innerHTML: 'Ver Anúncio no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap order-3 sm:order-3` });
+        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `${baseInputClasses} order-4 sm:order-4` });
+        const eJobSelect = createElement('select', { id: 'job-select', className: `${baseInputClasses} order-5 sm:order-5` });
+        const eSortSelect = createElement('select', { id: 'sort-select', className: `${baseInputClasses} order-6 sm:order-6` });
+        const eConfigJob = createElement('button', { innerHTML: 'settings', className: `material-symbols-outlined ${baseButtonClasses} order-7 sm:order-7` });
+        
+        eHeader.append(eDateLabel, eRooms, airbnb, eCalendar, eJobSelect, eSortSelect, eConfigJob);
+
+        const sortOptions = [
+            { value: 'position', label: 'Ordernar por Posição' },
+            { value: 'price', label: 'Ordernar por Preço' }
+        ];
+        sortOptions.forEach(option => eSortSelect.appendChild(createSelectOption(option.value, option.label)));
+
+        let jobs = [];
+
+        const updateDateLabel = (dateString) => {
+            const date = new Date(dateString + 'T00:00:00');
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            eDateLabel.innerHTML = date.toLocaleDateString('pt-BR', options);
+        };
+
+        const updateViewJobLink = () => {
+            const selectedJobId = eJobSelect.value;
+            const job = jobs.find(j => j.id == selectedJobId);
+            if (job) {
+                const checkinDateString = eCalendar.value;
+                const checkoutDate = new Date(checkinDateString + 'T00:00:00');
+                checkoutDate.setDate(checkoutDate.getDate() + 3);
+                const checkoutDateString = checkoutDate.toISOString().split('T')[0];
+                const amenitiesQuery = (job.amenities && job.amenities.length > 0) ? job.amenities.map(a => `&amenities%5B%5D=${a}`).join('') : '';
+                const priceQuery = job.price_max ? `&price_max=${job.price_max}&price_filter_input_type=${job.price_filter_input_type}` : '';
+                const url = `https://www.airbnb.com.br/s/${job.tag}/homes?adults=${job.adults}&min_bedrooms=${job.min_bedrooms}&check_in=${checkinDateString}&check_out=${checkoutDateString}${amenitiesQuery}${priceQuery}`;
+                airbnb.href = url;
+                airbnb.target = '_blank';
+            } else {
+                airbnb.href = '#';
+                airbnb.target = '';
+            }
+        };
+
+        const populateJobSelect = async () => {
+            try {
+                const response = await fetch(`${globalThis.auth.SUPABASE_URL}/rest/v1/jobs?select=*`, {
+                    headers: { 'Apikey': globalThis.auth.SUPABASE_ANON_KEY, "Content-Type": "application/json" }
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                jobs = await response.json();
+                
+                eJobSelect.innerHTML = '';
+                let latestJobId = null;
+
+                if (jobs.length > 0) {
+                    jobs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    latestJobId = jobs[jobs.length - 1].id;
+
+                    jobs.forEach(job => {
+                        const label = `${job.id} | ${job.label || 'N/A'} | Adultos: ${job.adults || 'N/A'} | Quartos: ${job.min_bedrooms || 'N/A'}`;
+                        eJobSelect.appendChild(createSelectOption(job.id, label));
+                    });
+                    eJobSelect.value = latestJobId;
+                }
+                return latestJobId;
+            } catch (error) {
+                console.error("Failed to populate jobs:", error);
+                eContent.innerHTML = `<div class="col-span-full text-center p-4 bg-red-100 text-red-700 rounded-lg">Erro ao carregar os jobs. Verifique o console.</div>`;
+                return null;
+            }
+        };
+
+        const fetchDataForDate = async (checkinDate, jobId, sortBy) => {
+            eContent.innerHTML = `<div class="col-span-full text-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div><p class="mt-4">Carregando dados...</p></div>`;
+
+            let url = `${globalThis.auth.SUPABASE_URL}/rest/v1/frontend?select=id,name,gold,room_image_array,position,title,host_image,favorite,superhost,reference_label,average_price_per_night,tagged,latitude,longitude&checkin=eq.${checkinDate}&limit=72`;
+            if (jobId) url += `&job=eq.${jobId}`;
+            url += sortBy === 'price' ? `&order=average_price_per_night` : `&order=position`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Apikey': globalThis.auth.SUPABASE_ANON_KEY, "Content-Type": "application/json" }
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                
+                eContent.innerHTML = ''; 
+                if (data && data.length > 0) {
+                    data.forEach(item => {
+                        const imageUrl = (item.room_image_array && item.room_image_array.length > 0) ? item.room_image_array[0] : item.host_image;
+
+                        const eWrapper = createElement('div', { className: 'relative group' });
+
+                        const eItem = createElement('article', { 
+                            className: 'item bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer',
+                            dataset: { id: item.id }
+                        });
+                        if (item.tagged) eItem.setAttribute('tagged', '');
+
+                        const price = item.average_price_per_night ? `R$ ${item.average_price_per_night}` : 'N/A';
+                        
+                        eItem.innerHTML = `
+                            <div class="relative">
+                                <img src="${imageUrl}" alt="Imagem do Quarto" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
+                                <div class="absolute top-2 left-2 bg-black bg-opacity-60 text-white text-sm font-bold px-2 py-1 rounded-full">${item.position}</div>
+                                <div class="absolute bottom-2 right-2 flex space-x-1">
+                                    <span class="material-symbols-outlined text-xs p-1 rounded-full bg-white bg-opacity-80 ${item.favorite ? 'icon-true' : 'icon-false'}">favorite</span>
+                                    <span class="material-symbols-outlined text-xs p-1 rounded-full bg-white bg-opacity-80 ${item.superhost ? 'icon-true' : 'icon-false'}">star</span>
+                                    <span class="material-symbols-outlined text-xs p-1 rounded-full bg-white bg-opacity-80 ${item.gold ? 'icon-true' : 'icon-false'}">beenhere</span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-bold text-md truncate" title="${item.title}">${item.title}</h3>
+                                <p class="text-sm text-gray-500">${item.reference_label || '&nbsp;'}</p>
+                                <p class="text-lg font-semibold mt-2">${price}</p>
+                            </div>
+                        `;
+                        
+                        if (item.latitude && item.longitude) {
+                            const eTooltip = createElement('div', {
+                                className: 'absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-800 text-white text-xs rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 whitespace-nowrap z-20 pointer-events-none',
+                                innerHTML: `Lat: ${Number(item.latitude).toFixed(4)}, Lon: ${Number(item.longitude).toFixed(4)}
+                                            <div class="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800"></div>`
+                            });
+                            eWrapper.appendChild(eTooltip);
+                        }
+                        
+                        eWrapper.appendChild(eItem);
+                        eContent.appendChild(eWrapper);
+
+                        eItem.addEventListener('click', () => {
+                            console.log(`Item clicked: ID ${item.id}. A modal should open here.`);
+                        });
+                    });
+                } else {
+                    eContent.innerHTML = `<div class="col-span-full text-center p-8 bg-gray-100 rounded-lg"><p>Nenhum dado disponível para esta data.</p></div>`;
+                }
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+                eContent.innerHTML = `<div class="col-span-full text-center p-4 bg-red-100 text-red-700 rounded-lg">Erro ao carregar os dados. Verifique o console.</div>`;
+            }
+        };
+
+        const handleDateChange = () => {
+            const newDate = eCalendar.value;
+            fetchDataForDate(newDate, eJobSelect.value, eSortSelect.value);
+            updateViewJobLink();
+            updateDateLabel(newDate);
+        };
+
+        eCalendar.addEventListener('change', handleDateChange);
+        eJobSelect.addEventListener('change', () => {
+            fetchDataForDate(eCalendar.value, eJobSelect.value, eSortSelect.value);
+            updateViewJobLink();
+        });
+        eSortSelect.addEventListener('change', () => {
+            fetchDataForDate(eCalendar.value, eJobSelect.value, eSortSelect.value);
+        });
+
+        eRooms.addEventListener('click', () => console.log("Rooms button clicked. Navigating to rooms..."));
+        eConfigJob.addEventListener('click', () => console.log("Config Job button clicked. Navigating to job config..."));
+
+        document.addEventListener('keydown', (event) => {
+            if (document.activeElement === eCalendar || document.activeElement === eJobSelect || document.activeElement === eSortSelect) {
+                return;
+            }
+            const currentDate = new Date(eCalendar.value + 'T00:00:00');
+            let dateChanged = false;
+            if (event.key === 'ArrowLeft') {
+                currentDate.setDate(currentDate.getDate() - 1);
+                dateChanged = true;
+            } else if (event.key === 'ArrowRight') {
+                currentDate.setDate(currentDate.getDate() + 1);
+                dateChanged = true;
+            }
+            if (dateChanged) {
+                eCalendar.value = currentDate.toISOString().split('T')[0];
+                handleDateChange();
+            }
+        });
+
+        const initializeApp = async () => {
+            if (typeof globalThis.auth === 'undefined' || !globalThis.auth.SUPABASE_URL) {
+                eContent.innerHTML = `
+                    <div class="col-span-full text-center p-8 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
+                        <h2 class="text-2xl font-bold mb-2">Aguardando Autenticação...</h2>
+                        <p>Se a página não carregar, verifique se o script de autenticação foi carregado corretamente.</p>
+                    </div>
+                `;
+                setTimeout(initializeApp, 1000);
+                return;
+            }
+            const initialJobId = await populateJobSelect();
+            fetchDataForDate(tomorrowFormatted, initialJobId, eSortSelect.value);
+            updateViewJobLink();
+            updateDateLabel(tomorrowFormatted);
+        };
+
+        initializeApp();
+
+    </script>
+</body>
+</html>

@@ -93,6 +93,9 @@
             transform: scale(1.1);
             z-index: 1000 !important;
         }
+        .price-marker.selected {
+            background-color: rgba(59, 130, 246, 0.8);
+        }
         .price-marker::after {
             content: none;
         }
@@ -105,12 +108,18 @@
             border-color: #f59e0b; /* amber-500 */
             color: #111827; /* gray-900 */
         }
+        .price-marker.tagged-marker.selected {
+            background-color: rgba(250, 204, 21, 0.8);
+        }
         
         /* Estilo para o marcador simples (zoom out) - replicando o visual do cluster */
         .simple-marker {
             background-color: rgba(59, 130, 246, 0.4); /* Cor do cluster com transparência */
             background-clip: padding-box;
             border-radius: 20px;
+        }
+        .simple-marker.selected {
+            background-color: rgba(59, 130, 246, 0.8);
         }
         .simple-marker div {
             width: 30px;
@@ -124,6 +133,7 @@
             background-color: #3b82f6; /* Cor sólida interna */
             line-height:30px;
         }
+        
     </style>
 </head>
 <body class="flex flex-col">
@@ -172,6 +182,7 @@
         let jobs = [];
         let selectedJobId = null;
         let currentLocations = [];
+        let previousMarker = null;
 
         const createElement = (tag, options = {}) => {
             const el = document.createElement(tag);
@@ -188,11 +199,14 @@
             return el;
         };
         
-        const createPriceMarkerIcon = (price, isTagged) => {
+        const createPriceMarkerIcon = (price, isTagged, isSelected = false) => {
             const markerHtml = `<span>R$${price}</span>`;
             let className = 'price-marker';
             if (isTagged) {
                 className += ' tagged-marker';
+            }
+            if (isSelected) {
+                className += ' selected';
             }
             return L.divIcon({
                 html: markerHtml,
@@ -202,10 +216,14 @@
             });
         };
 
-        const createSimpleMarkerIcon = () => {
+        const createSimpleMarkerIcon = (isSelected = false) => {
+            let className = 'simple-marker';
+            if (isSelected) {
+                className += ' selected';
+            }
             return L.divIcon({
                 html: `<div><span>1</span></div>`,
-                className: 'simple-marker',
+                className: className,
                 iconSize: [40, 40]
             });
         };
@@ -267,11 +285,14 @@
         eHeader.append(eHeaderLeft, eHeaderCenter, airbnb);
 
         const resetHighlights = () => {
-            currentLocations.forEach(loc => {
-                if (loc.marker) {
-                    loc.marker.setOpacity(1.0);
+            if (previousMarker) {
+                const location = currentLocations.find(loc => loc.marker === previousMarker);
+                if (location) {
+                    const newIcon = map.getZoom() >= 16 ? createPriceMarkerIcon(location.average_price_per_night || 'N/A', location.tagged, false) : createSimpleMarkerIcon(false);
+                    previousMarker.setIcon(newIcon);
                 }
-            });
+                previousMarker = null;
+            }
         };
 
         const closeSidebar = () => {
@@ -280,13 +301,12 @@
         };
 
         const selectItem = (selectedItem) => {
-            currentLocations.forEach(loc => {
-                if (loc.marker) {
-                    const isSelected = loc.id === selectedItem.id;
-                    loc.marker.setOpacity(isSelected ? 1.0 : 0.5);
-                }
-            });
+            resetHighlights();
             openSidebar(selectedItem);
+            
+            const newIcon = map.getZoom() >= 16 ? createPriceMarkerIcon(selectedItem.average_price_per_night || 'N/A', selectedItem.tagged, true) : createSimpleMarkerIcon(true);
+            selectedItem.marker.setIcon(newIcon);
+            previousMarker = selectedItem.marker;
 
             const listingSidebarWidth = 192;
             const detailsSidebarWidth = 384;
@@ -461,6 +481,9 @@
                             baseClasses += ' tagged-highlight';
                         }
                         listItem.className = baseClasses;
+                        listItem.addEventListener('click', () => {
+                            selectItem(item);
+                        });
                         listItem.innerHTML = `
                             <h4 class="font-semibold text-gray-800 text-xs truncate">${item.title}</h4>
                             <p class="text-gray-500 text-xs truncate mt-1">${item.name || ''}</p>
@@ -473,9 +496,6 @@
                                 <p class="font-bold text-gray-900 text-sm">R$ ${item.average_price_per_night || 'N/A'}</p>
                             </div>
                         `;
-                        listItem.addEventListener('click', () => {
-                            selectItem(item);
-                        });
                         eListingSidebarContent.appendChild(listItem);
                     });
                     
@@ -541,10 +561,21 @@
                 markersLayer.eachLayer(marker => {
                     const location = currentLocations.find(loc => loc.marker === marker);
                     if (location) {
-                        const newIcon = currentZoom >= zoomThreshold ? location.priceIcon : location.simpleIcon;
-                        marker.setIcon(newIcon);
+                        // Reset all markers to their default state
+                        if (location.marker) {
+                            const newIcon = currentZoom >= zoomThreshold ? createPriceMarkerIcon(location.average_price_per_night || 'N/A', location.tagged, false) : createSimpleMarkerIcon(false);
+                            location.marker.setIcon(newIcon);
+                        }
                     }
                 });
+                // Re-apply highlight to the previously selected marker, if any
+                if(previousMarker) {
+                    const location = currentLocations.find(loc => loc.marker === previousMarker);
+                    if(location) {
+                         const newIcon = currentZoom >= zoomThreshold ? createPriceMarkerIcon(location.average_price_per_night || 'N/A', location.tagged, true) : createSimpleMarkerIcon(true);
+                         previousMarker.setIcon(newIcon);
+                    }
+                }
             });
 
             const initialJobId = await populateJobSelect();

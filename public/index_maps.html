@@ -150,7 +150,9 @@
         const eDateControlContainer = createElement('div', { className: 'flex items-center border border-gray-300 rounded-lg overflow-hidden' });
         const ePrevDayBtn = createElement('button', { id: 'prev-day-btn', className: 'py-[9px] px-2.5 bg-gray-50 hover:bg-gray-100 transition-colors border-r border-gray-300' });
         ePrevDayBtn.innerHTML = `<span class="material-symbols-outlined text-gray-600 text-base">chevron_left</span>`;
-        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `bg-gray-50 text-gray-900 text-sm focus:ring-0 block p-2.5 w-[110px]` });
+        
+        const eCalendar = createElement('input', { id: 'checkin-calendar', type: 'date', value: tomorrowFormatted, className: `bg-gray-50 text-gray-900 text-sm block p-2.5 w-[110px] border-none focus:ring-0` });
+        
         const eNextDayBtn = createElement('button', { id: 'next-day-btn', className: 'py-[9px] px-2.5 bg-gray-50 hover:bg-gray-100 transition-colors border-l border-gray-300' });
         eNextDayBtn.innerHTML = `<span class="material-symbols-outlined text-gray-600 text-base">chevron_right</span>`;
         eDateControlContainer.append(ePrevDayBtn, eCalendar, eNextDayBtn);

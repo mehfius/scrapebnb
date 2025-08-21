@@ -64,44 +64,65 @@
             display: none;
             -webkit-appearance: none;
         }
+        
         /* Estilos para o marcador de preço customizado */
         .price-marker {
-            background: #ffffff;
-            border: 1px solid #cccccc;
-            border-radius: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            color: #1f2937;
-            font-size: 14px;
+            background-color: rgba(59, 130, 246, 0.4); /* Cor do cluster com transparência */
+            background-clip: padding-box;
+            border-radius: 50%; /* Torna o contêiner externo circular */
+            width: 40px; /* Largura do contêiner externo */
+            height: 40px; /* Altura do contêiner externo */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+        }
+        .price-marker span {
+            background-color: #3b82f6; /* Cor sólida do marcador simples */
+            border-radius: 50%; /* Torna o círculo interno */
+            width: 30px; /* Largura do círculo interno */
+            height: 30px; /* Altura do círculo interno */
+            color: #ffffff;
+            font-size: 9px; /* Fonte ainda menor */
             font-weight: 600;
-            padding: 5px 12px;
-            white-space: nowrap;
-            text-align: center;
-            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .price-marker:hover {
             transform: scale(1.1);
             z-index: 1000 !important;
         }
         .price-marker::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid #ffffff;
-            filter: drop-shadow(0 3px 2px rgba(0,0,0,0.1));
+            content: none;
         }
+        /* Estilo para a borda do marcador tagged */
         .price-marker.tagged-marker {
+            background-color: rgba(250, 204, 21, 0.4); /* Cor amarela com transparência */
+        }
+        .price-marker.tagged-marker span {
             background-color: #facc15; /* amber-400 */
             border-color: #f59e0b; /* amber-500 */
             color: #111827; /* gray-900 */
         }
-        .price-marker.tagged-marker::after {
-             border-top-color: #facc15;
+        
+        /* Estilo para o marcador simples (zoom out) - replicando o visual do cluster */
+        .simple-marker {
+            background-color: rgba(59, 130, 246, 0.4); /* Cor do cluster com transparência */
+            background-clip: padding-box;
+            border-radius: 20px;
+        }
+        .simple-marker div {
+            width: 30px;
+            height: 30px;
+            margin-left: 5px;
+            margin-top: 5px;
+            text-align: center;
+            border-radius: 15px;
+            font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #3b82f6; /* Cor sólida interna */
+            line-height:30px;
         }
     </style>
 </head>
@@ -132,7 +153,7 @@
 
         <aside id="listing-sidebar" class="absolute top-0 right-0 h-full w-48 bg-white shadow-lg z-30 overflow-y-auto">
             <div class="p-4 border-b">
-                 <h2 class="text-xl font-bold text-gray-800">Acomodações</h2>
+                <h2 class="text-xl font-bold text-gray-800">Acomodações</h2>
             </div>
             <div id="listing-sidebar-content" class="p-2 space-y-2">
             </div>
@@ -168,7 +189,7 @@
         };
         
         const createPriceMarkerIcon = (price, isTagged) => {
-            const markerHtml = `R$${price}`;
+            const markerHtml = `<span>R$${price}</span>`;
             let className = 'price-marker';
             if (isTagged) {
                 className += ' tagged-marker';
@@ -176,8 +197,16 @@
             return L.divIcon({
                 html: markerHtml,
                 className: className,
-                iconSize: null,
-                iconAnchor: [35, 40]
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+        };
+
+        const createSimpleMarkerIcon = () => {
+            return L.divIcon({
+                html: `<div><span>1</span></div>`,
+                className: 'simple-marker',
+                iconSize: [40, 40]
             });
         };
 
@@ -269,10 +298,10 @@
 
             if (parent && parent.getChildCount) {
                 const clusterBounds = parent.getBounds();
-                targetZoom = map.getBoundsZoom(clusterBounds, true) + 1;
+                targetZoom = map.getBoundsZoom(clusterBounds, true);
             }
             
-            targetZoom = Math.max(targetZoom, 16);
+            targetZoom = Math.max(targetZoom, 14);
 
             const offset = L.point(totalSidebarWidth / 2, 0);
             const targetPoint = map.project(targetLatLng, targetZoom);
@@ -301,18 +330,18 @@
                     <h3 class="font-bold text-lg text-gray-900">${item.title}</h3>
                     <p class="text-2xl font-semibold text-gray-800">${price} <span class="text-base font-normal text-gray-600">/ noite</span></p>
                     <div class="flex justify-start items-center gap-6 text-gray-600 border-t pt-4">
-                         <div class="flex items-center gap-1.5" title="Favorito">
-                             <span class="material-symbols-outlined text-lg ${item.favorite ? 'text-red-500' : 'text-gray-400'}">favorite</span>
-                             <span class="text-sm font-medium">Favorito</span>
-                         </div>
-                         <div class="flex items-center gap-1.5" title="Superhost">
-                             <span class="material-symbols-outlined text-lg ${item.superhost ? 'text-yellow-500' : 'text-gray-400'}">star</span>
-                             <span class="text-sm font-medium">Superhost</span>
-                         </div>
-                         <div class="flex items-center gap-1.5" title="Selo Gold">
-                             <span class="material-symbols-outlined text-lg ${item.gold ? 'text-amber-400' : 'text-gray-400'}">beenhere</span>
-                             <span class="text-sm font-medium">Gold</span>
-                         </div>
+                        <div class="flex items-center gap-1.5" title="Favorito">
+                            <span class="material-symbols-outlined text-lg ${item.favorite ? 'text-red-500' : 'text-gray-400'}">favorite</span>
+                            <span class="text-sm font-medium">Favorito</span>
+                        </div>
+                        <div class="flex items-center gap-1.5" title="Superhost">
+                            <span class="material-symbols-outlined text-lg ${item.superhost ? 'text-yellow-500' : 'text-gray-400'}">star</span>
+                            <span class="text-sm font-medium">Superhost</span>
+                        </div>
+                        <div class="flex items-center gap-1.5" title="Selo Gold">
+                            <span class="material-symbols-outlined text-lg ${item.gold ? 'text-amber-400' : 'text-gray-400'}">beenhere</span>
+                            <span class="text-sm font-medium">Gold</span>
+                        </div>
                     </div>
                     <a href="https://www.airbnb.com.br/rooms/${item.room}" target="_blank" class="block w-full text-center bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-all duration-300 shadow-lg hover:shadow-xl mt-2">Ver no Airbnb</a>
                 </div>
@@ -410,9 +439,11 @@
                 if (locationsWithData.length > 0) {
                     const markerBounds = [];
                     locationsWithData.forEach(item => {
-                        const price = item.average_price_per_night || 'N/A';
-                        const icon = createPriceMarkerIcon(price, item.tagged);
-                        const marker = L.marker([item.latitude, item.longitude], { icon: icon });
+                        item.priceIcon = createPriceMarkerIcon(item.average_price_per_night || 'N/A', item.tagged);
+                        item.simpleIcon = createSimpleMarkerIcon();
+
+                        const initialIcon = map.getZoom() >= 16 ? item.priceIcon : item.simpleIcon;
+                        const marker = L.marker([item.latitude, item.longitude], { icon: initialIcon });
                         
                         item.marker = marker;
                         currentLocations.push(item);
@@ -502,6 +533,19 @@
             markersLayer = L.markerClusterGroup({ maxClusterRadius: 20 }).addTo(map);
 
             map.on('click', closeSidebar);
+
+            map.on('zoomend', () => {
+                const currentZoom = map.getZoom();
+                const zoomThreshold = 16; 
+
+                markersLayer.eachLayer(marker => {
+                    const location = currentLocations.find(loc => loc.marker === marker);
+                    if (location) {
+                        const newIcon = currentZoom >= zoomThreshold ? location.priceIcon : location.simpleIcon;
+                        marker.setIcon(newIcon);
+                    }
+                });
+            });
 
             const initialJobId = await populateJobSelect();
             if(initialJobId) {

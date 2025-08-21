@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Scrapebnb</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="icon-512x512.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon-512x512.png">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md p-8 space-y-8 bg-white shadow-lg rounded-xl">
+            <div class="text-center">
+                <img class="w-auto h-24 mx-auto" src="img/scrapebnb.jpg" alt="Scrapebnb Logo">
+                <h2 class="mt-6 text-3xl font-bold text-gray-900">
+                    Acesse sua conta
+                </h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Bem-vindo de volta! Escolha um método para entrar.
+                </p>
+            </div>
+
+            <div>
+                <button id="google-login-button" class="relative flex justify-center w-full px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md group hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <img class="w-5 h-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
+                    Entrar com Google
+                </button>
+            </div>
+
+            <div class="relative flex items-center justify-center">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative px-2 text-sm text-gray-500 bg-white">
+                    OU
+                </div>
+            </div>
+
+            <form id="email-login-form" class="mt-8 space-y-6">
+                <div class="-space-y-px rounded-md shadow-sm">
+                    <div>
+                        <label for="email-address" class="sr-only">Email</label>
+                        <input id="email-address" name="email" type="email" autocomplete="email" required class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Senha</label>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Senha">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                            Esqueceu sua senha?
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Entrar
+                    </button>
+                </div>
+            </form>
+             <div class="text-sm text-center">
+                <p class="text-gray-600">Não tem uma conta? 
+                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Crie uma agora
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase_auth_airbnb.js"></script>
+    <script>
+        const googleLoginButton = document.getElementById('google-login-button');
+        const emailLoginForm = document.getElementById('email-login-form');
+        const emailInput = document.getElementById('email-address');
+        const passwordInput = document.getElementById('password');
+
+        googleLoginButton.addEventListener('click', async () => {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+            });
+            if (error) {
+                console.error('Error logging in with Google:', error);
+                alert('Ocorreu um erro ao tentar fazer login com o Google.');
+            }
+        });
+
+        emailLoginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            const { error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                console.error('Error logging in with email:', error);
+                alert('Email ou senha inválidos.');
+            }
+        });
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                window.location.href = '/index_maps.html';
+            }
+        });
+    </script>
+</body>
+</html>

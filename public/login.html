@@ -14,25 +14,35 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <div class="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div class="w-full max-w-md p-8 space-y-8 bg-white shadow-lg rounded-xl">
+        <div id="login-container" class="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-xl">
             <div class="text-center">
                 <img class="w-auto h-24 mx-auto" src="img/scrapebnb.jpg" alt="Scrapebnb Logo">
-                <h2 class="mt-6 text-3xl font-bold text-gray-900">
+                <h2 id="form-title" class="mt-6 text-3xl font-bold text-gray-900">
                     Acesse sua conta
                 </h2>
-                <p class="mt-2 text-sm text-gray-600">
+                <p id="form-subtitle" class="mt-2 text-sm text-gray-600">
                     Bem-vindo de volta! Escolha um método para entrar.
                 </p>
             </div>
 
+            <div id="notification-area" class="hidden p-4 text-sm text-white rounded-md"></div>
+
             <div>
-                <button id="google-login-button" class="relative flex justify-center w-full px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md group hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <button id="google-login-button" class="relative flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md group hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <img class="w-5 h-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
-                    Entrar com Google
+                    <span class="button-text">Entrar com Google</span>
+                    <div class="spinner hidden w-4 h-4 ml-2 border-t-2 border-b-2 border-gray-900 rounded-full"></div>
                 </button>
             </div>
 
@@ -45,7 +55,7 @@
                 </div>
             </div>
 
-            <form id="email-login-form" class="mt-8 space-y-6">
+            <form id="email-form" class="mt-8 space-y-6">
                 <div class="-space-y-px rounded-md shadow-sm">
                     <div>
                         <label for="email-address" class="sr-only">Email</label>
@@ -57,7 +67,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-end">
                     <div class="text-sm">
                         <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
                             Esqueceu sua senha?
@@ -66,17 +76,33 @@
                 </div>
 
                 <div>
-                    <button type="submit" class="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Entrar
+                    <button id="email-submit-button" type="submit" class="relative flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <span class="button-text">Entrar</span>
+                        <div class="spinner hidden w-4 h-4 ml-2 border-t-2 border-b-2 border-white rounded-full"></div>
                     </button>
                 </div>
             </form>
-             <div class="text-sm text-center">
+             <div id="toggle-form-area" class="text-sm text-center">
                 <p class="text-gray-600">Não tem uma conta? 
-                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    <a id="toggle-form-link" href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
                         Crie uma agora
                     </a>
                 </p>
+            </div>
+        </div>
+
+        <div id="user-info-container" class="hidden w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-xl">
+            <div class="text-center">
+                <img id="user-avatar" class="w-24 h-24 mx-auto rounded-full" src="" alt="User Avatar">
+                <h2 id="user-name" class="mt-6 text-3xl font-bold text-gray-900"></h2>
+                <p id="user-email" class="mt-2 text-sm text-gray-600"></p>
+            </div>
+            <div class="space-y-4">
+                 <a href="/index_maps.html" class="block w-full px-4 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Ver Mapa</a>
+                 <a href="/index_cards.html" class="block w-full px-4 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Ver Cards</a>
+                <button id="logout-button" class="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                    Deslogar
+                </button>
             </div>
         </div>
     </div>
@@ -84,42 +110,191 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase_auth_airbnb.js"></script>
     <script>
+        const loginContainer = document.getElementById('login-container');
+        const userInfoContainer = document.getElementById('user-info-container');
         const googleLoginButton = document.getElementById('google-login-button');
-        const emailLoginForm = document.getElementById('email-login-form');
+        const emailForm = document.getElementById('email-form');
         const emailInput = document.getElementById('email-address');
         const passwordInput = document.getElementById('password');
+        const emailSubmitButton = document.getElementById('email-submit-button');
+        const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
+        const toggleFormLink = document.getElementById('toggle-form-link');
+        const toggleFormArea = document.getElementById('toggle-form-area');
+        const notificationArea = document.getElementById('notification-area');
+        const logoutButton = document.getElementById('logout-button');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userEmail = document.getElementById('user-email');
+
+        let isSignUp = false;
+
+        const setLoading = (button, isLoading) => {
+            const buttonText = button.querySelector('.button-text');
+            const spinner = button.querySelector('.spinner');
+            if (isLoading) {
+                button.disabled = true;
+                if(buttonText) buttonText.classList.add('hidden');
+                if(spinner) spinner.classList.remove('hidden');
+            } else {
+                button.disabled = false;
+                if(buttonText) buttonText.classList.remove('hidden');
+                if(spinner) spinner.classList.add('hidden');
+            }
+        };
+
+        const showNotification = (message, type) => {
+            notificationArea.textContent = message;
+            notificationArea.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
+            notificationArea.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+        };
+
+        const showUserInfo = (user) => {
+            console.log('showUserInfo chamado com usuário:', user); // Log para depuração
+            loginContainer.classList.add('hidden');
+            userInfoContainer.classList.remove('hidden');
+            userName.textContent = `Bem-vindo, ${user.user_metadata?.full_name || user.email || 'Usuário'}`;
+            userEmail.textContent = user.email || 'Email não disponível';
+            userAvatar.src = user.user_metadata?.avatar_url || 'img/scrapebnb.png';
+        };
+
+        const showLoginForm = () => {
+            loginContainer.classList.remove('hidden');
+            userInfoContainer.classList.add('hidden');
+        };
 
         googleLoginButton.addEventListener('click', async () => {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-            });
+            console.log('Iniciando login com Google');
+            setLoading(googleLoginButton, true);
+            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
             if (error) {
-                console.error('Error logging in with Google:', error);
-                alert('Ocorreu um erro ao tentar fazer login com o Google.');
+                console.error('Erro no login com Google:', error);
+                showNotification(`Erro no login com Google: ${error.message}`, 'error');
+                setLoading(googleLoginButton, false);
+            } else {
+                console.log('Login com Google iniciado, esperando redirecionamento');
             }
         });
 
-        emailLoginForm.addEventListener('submit', async (event) => {
+        emailForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            setLoading(emailSubmitButton, true);
+            notificationArea.classList.add('hidden');
+
             const email = emailInput.value;
             const password = passwordInput.value;
 
-            const { error } = await supabase.auth.signInWithPassword({
+            const authFunction = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword;
+
+            const { data, error } = await authFunction({
                 email: email,
                 password: password,
             });
 
             if (error) {
-                console.error('Error logging in with email:', error);
-                alert('Email ou senha inválidos.');
+                showNotification(isSignUp ? `Erro ao criar conta: ${error.message}` : `Erro no login: ${error.message}`, 'error');
+            } else if (isSignUp) {
+                showNotification('Conta criada com sucesso! Verifique seu email para confirmação.', 'success');
+                emailForm.reset();
+            } else {
+                // Redireciona para /home após login bem-sucedido
+                window.location.assign('/home');
+            }
+            
+            setLoading(emailSubmitButton, false);
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+        });
+
+        toggleFormLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            isSignUp = !isSignUp;
+            notificationArea.classList.add('hidden');
+
+            if (isSignUp) {
+                formTitle.textContent = 'Crie sua conta';
+                formSubtitle.textContent = 'É rápido e fácil.';
+                emailSubmitButton.querySelector('.button-text').textContent = 'Criar conta';
+                toggleFormArea.innerHTML = `<p class="text-gray-600">Já tem uma conta? <a id="toggle-form-link" href="#" class="font-medium text-indigo-600 hover:text-indigo-500">Entre agora</a></p>`;
+            } else {
+                formTitle.textContent = 'Acesse sua conta';
+                formSubtitle.textContent = 'Bem-vindo de volta! Escolha um método para entrar.';
+                emailSubmitButton.querySelector('.button-text').textContent = 'Entrar';
+                toggleFormArea.innerHTML = `<p class="text-gray-600">Não tem uma conta? <a id="toggle-form-link" href="#" class="font-medium text-indigo-600 hover:text-indigo-500">Crie uma agora</a></p>`;
+            }
+            // Re-add event listener to the new link
+            document.getElementById('toggle-form-link').addEventListener('click', arguments.callee);
+        });
+
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('Auth event:', event, session); // Log para depuração
+            if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                if (session) {
+                    try {
+                        const { data: { user }, error } = await supabase.auth.getUser();
+                        if (error) {
+                            console.error('Erro ao obter usuário:', error);
+                            showNotification(`Erro ao obter dados do usuário: ${error.message}`, 'error');
+                            showLoginForm();
+                            return;
+                        }
+                        console.log('Usuário logado:', user);
+                        if (user) {
+                            showUserInfo(user);
+                            console.log('Exibindo informações do usuário e redirecionando para /home');
+                            window.location.assign('/home'); // Redireciona para /home
+                        } else {
+                            console.error('Usuário não encontrado na sessão');
+                            showLoginForm();
+                        }
+                    } catch (err) {
+                        console.error('Erro inesperado:', err);
+                        showNotification('Erro inesperado ao processar login', 'error');
+                        showLoginForm();
+                    }
+                } else {
+                    console.log('Nenhuma sessão encontrada');
+                    showLoginForm();
+                }
+            } else if (event === 'SIGNED_OUT') {
+                console.log('Usuário deslogado');
+                showLoginForm();
+                window.location.assign('/'); // Redireciona para a raiz após logout
             }
         });
 
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                window.location.href = '/index_maps.html';
+        // Verificação inicial da sessão
+        (async () => {
+            console.log('Verificando sessão inicial');
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            if (sessionError) {
+                console.error('Erro ao obter sessão:', sessionError);
+                showLoginForm();
+                return;
             }
-        });
+            if (session) {
+                console.log('Sessão encontrada:', session);
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (error) {
+                    console.error('Erro ao obter usuário:', error);
+                    showLoginForm();
+                    return;
+                }
+                if (user) {
+                    console.log('Usuário já logado:', user);
+                    showUserInfo(user);
+                    window.location.assign('/home'); // Redireciona para /home
+                } else {
+                    console.log('Nenhum usuário encontrado na sessão');
+                    showLoginForm();
+                }
+            } else {
+                console.log('Nenhuma sessão encontrada');
+                showLoginForm();
+            }
+        })();
     </script>
 </body>
 </html>

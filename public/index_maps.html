@@ -171,6 +171,23 @@
         .image-loading-container img.hidden {
             display: none;
         }
+
+        @keyframes pulsate-sidebar-item {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 5px rgba(59, 130, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+        #listing-sidebar-content .selected {
+            animation: pulsate-sidebar-item 2s infinite;
+            border-color: #3b82f6; /* blue-600 */
+            background-color: #eff6ff; /* blue-50 */
+        }
     </style>
 </head>
 <body class="flex flex-col">
@@ -220,6 +237,7 @@
         let selectedJobId = null;
         let currentLocations = [];
         let previousMarker = null;
+        let previousSelectedItemId = null;
 
         const createElement = (tag, options = {}) => {
             const el = document.createElement(tag);
@@ -330,6 +348,13 @@
                 }
                 previousMarker = null;
             }
+            if (previousSelectedItemId) {
+                const previousListItem = document.getElementById(`listing-item-${previousSelectedItemId}`);
+                if (previousListItem) {
+                    previousListItem.classList.remove('selected');
+                }
+                previousSelectedItemId = null;
+            }
         };
 
         const closeSidebar = () => {
@@ -344,6 +369,12 @@
             const newIcon = map.getZoom() >= 16 ? createPriceMarkerIcon(selectedItem.average_price_per_night || 'N/A', selectedItem.tagged, true) : createSimpleMarkerIcon(true);
             selectedItem.marker.setIcon(newIcon);
             previousMarker = selectedItem.marker;
+
+            const listItem = document.getElementById(`listing-item-${selectedItem.id}`);
+            if (listItem) {
+                listItem.classList.add('selected');
+            }
+            previousSelectedItemId = selectedItem.id;
 
             const listingSidebarWidth = 192;
             const detailsSidebarWidth = 384;
@@ -520,6 +551,7 @@
                         markerBounds.push([item.latitude, item.longitude]);
 
                         const listItem = document.createElement('div');
+                        listItem.id = `listing-item-${item.id}`;
                         let baseClasses = 'p-2 rounded-lg border cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all';
                         if (item.tagged) {
                             baseClasses += ' tagged-highlight';

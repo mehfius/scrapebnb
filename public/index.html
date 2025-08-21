@@ -38,46 +38,6 @@
                     <div class="spinner hidden w-4 h-4 ml-2 border-t-2 border-b-2 border-gray-900 rounded-full"></div>
                 </button>
             </div>
-            <div class="relative flex items-center justify-center">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative px-2 text-sm text-gray-500 bg-white">
-                    OU
-                </div>
-            </div>
-            <form id="email-form" class="mt-8 space-y-6">
-                <div class="-space-y-px rounded-md shadow-sm">
-                    <div>
-                        <label for="email-address" class="sr-only">Email</label>
-                        <input id="email-address" name="email" type="email" autocomplete="email" required class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email">
-                    </div>
-                    <div>
-                        <label for="password" class="sr-only">Senha</label>
-                        <input id="password" name="password" type="password" autocomplete="current-password" required class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Senha">
-                    </div>
-                </div>
-                <div class="flex items-center justify-end">
-                    <div class="text-sm">
-                        <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
-                            Esqueceu sua senha?
-                        </a>
-                    </div>
-                </div>
-                <div>
-                    <button id="email-submit-button" type="submit" class="relative flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <span class="button-text">Entrar</span>
-                        <div class="spinner hidden w-4 h-4 ml-2 border-t-2 border-b-2 border-white rounded-full"></div>
-                    </button>
-                </div>
-            </form>
-            <div id="toggle-form-area" class="text-sm text-center">
-                <p class="text-gray-600">Não tem uma conta?
-                    <a id="toggle-form-link" href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
-                        Crie uma agora
-                    </a>
-                </p>
-            </div>
         </div>
 
         <!-- USUÁRIO LOGADO -->
@@ -88,8 +48,8 @@
                 <p id="user-email" class="mt-2 text-sm text-gray-600"></p>
             </div>
             <div class="space-y-4">
-                <a href="/index_maps.html" class="block w-full px-4 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Ver Mapa</a>
-                <a href="/index_cards.html" class="block w-full px-4 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Ver Cards</a>
+                <a href="/map" class="block w-full px-4 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Ver Mapa</a>
+                <a href="/cards" class="block w-full px-4 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Ver Cards</a>
                 <button id="logout-button" class="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
                     Deslogar
                 </button>
@@ -104,20 +64,11 @@
             const loginContainer = document.getElementById('login-container');
             const userInfoContainer = document.getElementById('user-info-container');
             const googleLoginButton = document.getElementById('google-login-button');
-            const emailForm = document.getElementById('email-form');
-            const emailInput = document.getElementById('email-address');
-            const passwordInput = document.getElementById('password');
-            const emailSubmitButton = document.getElementById('email-submit-button');
-            const formTitle = document.getElementById('form-title');
-            const formSubtitle = document.getElementById('form-subtitle');
-            const toggleFormArea = document.getElementById('toggle-form-area');
             const notificationArea = document.getElementById('notification-area');
             const logoutButton = document.getElementById('logout-button');
             const userAvatar = document.getElementById('user-avatar');
             const userName = document.getElementById('user-name');
             const userEmail = document.getElementById('user-email');
-
-            let isSignUp = false;
 
             const setLoading = (button, isLoading) => {
                 const buttonText = button.querySelector('.button-text');
@@ -153,32 +104,6 @@
                 userInfoContainer.classList.add('hidden');
             };
 
-            const updateFormUI = () => {
-                const toggleLinkText = isSignUp ? 'Entre agora' : 'Crie uma agora';
-                const formTitleText = isSignUp ? 'Crie sua conta' : 'Acesse sua conta';
-                const formSubtitleText = isSignUp ? 'É rápido e fácil.' : 'Bem-vindo de volta! Escolha um método para entrar.';
-                const submitButtonText = isSignUp ? 'Criar conta' : 'Entrar';
-
-                formTitle.textContent = formTitleText;
-                formSubtitle.textContent = formSubtitleText;
-                emailSubmitButton.querySelector('.button-text').textContent = submitButtonText;
-                toggleFormArea.innerHTML = `<p class="text-gray-600">
-                    ${isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}
-                    <a id="toggle-form-link" href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
-                        ${toggleLinkText}
-                    </a>
-                </p>`;
-            };
-
-            document.body.addEventListener('click', (e) => {
-                if (e.target && e.target.id === 'toggle-form-link') {
-                    e.preventDefault();
-                    isSignUp = !isSignUp;
-                    notificationArea.classList.add('hidden');
-                    updateFormUI();
-                }
-            });
-
             googleLoginButton.addEventListener('click', async () => {
                 setLoading(googleLoginButton, true);
                 const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
@@ -188,58 +113,39 @@
                 }
             });
 
-            emailForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                setLoading(emailSubmitButton, true);
-                notificationArea.classList.add('hidden');
-                const email = emailInput.value;
-                const password = passwordInput.value;
-                const authFunction = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword;
-                const { data, error } = await authFunction({ email, password });
-                if (error) {
-                    showNotification(isSignUp ? `Erro ao criar conta: ${error.message}` : `Erro no login: ${error.message}`, 'error');
-                } else if (isSignUp) {
-                    showNotification('Conta criada com sucesso! Verifique seu email para confirmação.', 'success');
-                    emailForm.reset();
-                } else {
-                    showUserInfo(data.user);
-                }
-                setLoading(emailSubmitButton, false);
-            });
-
             logoutButton.addEventListener('click', async () => {
                 await supabase.auth.signOut();
             });
 
             // 🔥 Aqui a correção
-supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log('onAuthStateChange evento:', event, 'session:', session);
+            supabase.auth.onAuthStateChange(async (event, session) => {
+                console.log('onAuthStateChange evento:', event, 'session:', session);
 
-    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        if (session?.user) {
-            console.log('Usuário da sessão:', session.user);
-            showUserInfo(session.user);
-        } else {
-            if (event === 'INITIAL_SESSION') {
-                console.log('Nenhuma sessão encontrada, mostrando login');
-                showLoginForm();
-                return;
-            }
+                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                    if (session?.user) {
+                        console.log('Usuário da sessão:', session.user);
+                        showUserInfo(session.user);
+                    } else {
+                        if (event === 'INITIAL_SESSION') {
+                            console.log('Nenhuma sessão encontrada, mostrando login');
+                            showLoginForm();
+                            return;
+                        }
 
-            console.log('Tentando pegar usuário via getUser()...');
-            const { data, error } = await supabase.auth.getUser();
-            if (error || !data?.user) {
-                console.error('Erro ao obter usuário:', error);
-                showLoginForm();
-            } else {
-                showUserInfo(data.user);
-            }
-        }
-    } else if (event === 'SIGNED_OUT') {
-        console.log('Evento de SIGNED_OUT');
-        showLoginForm();
-    }
-});
+                        console.log('Tentando pegar usuário via getUser()...');
+                        const { data, error } = await supabase.auth.getUser();
+                        if (error || !data?.user) {
+                            console.error('Erro ao obter usuário:', error);
+                            showLoginForm();
+                        } else {
+                            showUserInfo(data.user);
+                        }
+                    }
+                } else if (event === 'SIGNED_OUT') {
+                    console.log('Evento de SIGNED_OUT');
+                    showLoginForm();
+                }
+            });
 
         });
     </script>

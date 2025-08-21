@@ -15,6 +15,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
     <script src="https://scrapebnb.vercel.app/js/supabase_auth_airbnb.js"></script>
 
     <style>
@@ -214,18 +218,29 @@
             });
             openSidebar(selectedItem);
 
-            const listingSidebarWidth = 192; // w-48
-            const detailsSidebarWidth = 384; // w-96
+            const listingSidebarWidth = 192;
+            const detailsSidebarWidth = 384;
             const totalSidebarWidth = listingSidebarWidth + detailsSidebarWidth;
+            const targetLatLng = selectedItem.marker.getLatLng();
 
-            const markerBounds = L.latLng(selectedItem.latitude, selectedItem.longitude).toBounds(1);
+            const parent = markersLayer.getVisibleParent(selectedItem.marker);
+            let targetZoom = map.getZoom();
 
-            map.flyToBounds(markerBounds, {
-                paddingTopLeft: [0, 0],
-                paddingBottomRight: [totalSidebarWidth, 0],
+            if (parent && parent.getChildCount) {
+                const clusterBounds = parent.getBounds();
+                targetZoom = map.getBoundsZoom(clusterBounds, true) + 1;
+            }
+            
+            targetZoom = Math.max(targetZoom, 16);
+
+            const offset = L.point(totalSidebarWidth / 2, 0);
+            const targetPoint = map.project(targetLatLng, targetZoom);
+            const newCenterPoint = targetPoint.add(offset);
+            const newCenterLatLng = map.unproject(newCenterPoint, targetZoom);
+
+            map.flyTo(newCenterLatLng, targetZoom, {
                 animate: true,
-                duration: 1.0,
-                maxZoom: map.getZoom()
+                duration: 1.0
             });
         };
 
@@ -441,7 +456,7 @@
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
-            markersLayer = L.layerGroup().addTo(map);
+            markersLayer = L.markerClusterGroup({ maxClusterRadius: 40 }).addTo(map);
 
             map.on('click', closeSidebar);
 

@@ -391,10 +391,10 @@
                 <div class="relative group image-loading-container">
                     <div id="image-loading-spinner" class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto hidden"></div>
                     <img id="room-image" src="${imageUrls[0]}" class="w-full h-48 object-cover rounded-lg shadow-md" onerror="this.onerror=null;this.src='https://placehold.co/400x192/cccccc/ffffff?text=Imagem';">
-                    <button id="prev-image-btn" class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white/70 text-gray-800 p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button id="prev-image-btn" class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white/70 text-gray-800 w-8 h-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                         <span class="material-symbols-outlined">chevron_left</span>
                     </button>
-                    <button id="next-image-btn" class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white/70 text-gray-800 p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button id="next-image-btn" class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white/70 text-gray-800 w-8 h-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                         <span class="material-symbols-outlined">chevron_right</span>
                     </button>
                     <div id="image-counter" class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full font-medium">1 / ${imageUrls.length}</div>

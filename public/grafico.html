@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela Financeira Mensal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2j9/7J44t4x8nE/gTzS7G/L0Fz+6Q5y1qP+6Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://scrapebnb.vercel.app/js/supabase_auth_airbnb.js"></script>
+</head>
+<body class="p-6 md:p-12">
+
+    <!-- Container principal com a tabela -->
+    <div class="max-w-4xl mx-auto space-y-10">
+        <h1 class="text-4xl font-bold text-gray-800 text-center">Tabela de Análise Mensal</h1>
+        
+        <!-- Tabela para Morada de Israel -->
+        <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Morada de Israel</h2>
+            <table class="w-full text-sm text-left text-gray-500 rounded-lg overflow-hidden">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Mês</th>
+                        <th scope="col" class="px-6 py-3">Valor (Tonziro)</th>
+                        <th scope="col" class="px-6 py-3">Valor (Airbnb)</th>
+                        <th scope="col" class="px-6 py-3">Dias (Taxa Ocupação)</th>
+                    </tr>
+                </thead>
+                <tbody id="moradaIsraelTableBody">
+                    <!-- Os dados da tabela serão renderizados aqui pelo JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabela para Monte Sião -->
+        <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Monte Sião</h2>
+            <table class="w-full text-sm text-left text-gray-500 rounded-lg overflow-hidden">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Mês</th>
+                        <th scope="col" class="px-6 py-3">Valor (Tonziro)</th>
+                        <th scope="col" class="px-6 py-3">Valor (Airbnb)</th>
+                        <th scope="col" class="px-6 py-3">Dias (Taxa Ocupação)</th>
+                    </tr>
+                </thead>
+                <tbody id="monteSiaoTableBody">
+                    <!-- Os dados da tabela serão renderizados aqui pelo JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="loading" class="text-center text-gray-500 hidden">
+            <i class="fa-solid fa-spinner fa-spin-pulse fa-2xl"></i>
+            <p class="mt-2">Carregando dados da tabela...</p>
+        </div>
+        
+        <div id="noData" class="text-center text-gray-500 hidden">
+            <p class="text-xl">Nenhum dado encontrado para exibir.</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Variável para armazenar o ID do usuário
+        let userId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Aguarda a biblioteca Supabase carregar
+            await new Promise(resolve => {
+                const checkSupabase = setInterval(() => {
+                    if (window.supabase) {
+                        clearInterval(checkSupabase);
+                        resolve();
+                    }
+                }, 50);
+            });
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                userId = user.id;
+                // Inicia o carregamento dos dados da tabela após a autenticação
+                await loadData();
+            } else {
+                console.error('Usuário não autenticado.');
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('noData').classList.remove('hidden');
+            }
+        });
+
+        // Função principal para carregar os dados
+        async function loadData() {
+            if (!userId) {
+                console.error('ID do usuário não encontrado.');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // Carrega os dados para as duas 'rooms'
+                const dataMoradaIsrael = await fetchData('1399343663227695463');
+                const dataMonteSiao = await fetchData('1399379936774297714');
+                
+                // Processa e renderiza a tabela para Morada de Israel
+                const processedMoradaIsrael = processData(dataMoradaIsrael);
+                renderTable(processedMoradaIsrael, 'moradaIsraelTableBody');
+
+                // Processa e renderiza a tabela para Monte Sião
+                const processedMonteSiao = processData(dataMonteSiao);
+                renderTable(processedMonteSiao, 'monteSiaoTableBody');
+
+            } catch (error) {
+                console.error('Erro ao carregar os dados:', error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Função para buscar os dados do Supabase
+        async function fetchData(roomId) {
+            const { data, error } = await supabase
+                .from('financeiro')
+                .select('*')
+                .eq('user_id', userId)
+                .eq('auto', 'true')
+                .eq('room', roomId)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            return data || [];
+        }
+
+        // Função para processar os dados e agrupar por mês e ano
+        function processData(data) {
+            const processed = data.reduce((acc, entry) => {
+                const dateKey = `${entry.ano}-${String(entry.mes).padStart(2, '0')}`;
+                if (!acc[dateKey]) {
+                    acc[dateKey] = { tonziroValor: 0, airbnbValor: 0, dias: 0 };
+                }
+                
+                if (entry.label === 'Tonziro') {
+                    acc[dateKey].tonziroValor += entry.valor / 100;
+                }
+                if (entry.label === 'Airbnb') {
+                    acc[dateKey].airbnbValor += entry.valor / 100;
+                }
+                if (entry.label === 'Taxa de ocupação' && (entry.dias !== null && typeof entry.dias === 'number')) {
+                    acc[dateKey].dias += entry.dias;
+                }
+                
+                return acc;
+            }, {});
+
+            // Converte o objeto processado em um array ordenado
+            const sortedKeys = Object.keys(processed).sort();
+            return sortedKeys.map(key => ({
+                monthYear: key,
+                tonziroValor: processed[key].tonziroValor,
+                airbnbValor: processed[key].airbnbValor,
+                dias: processed[key].dias
+            }));
+        }
+
+        // Função para renderizar a tabela
+        function renderTable(data, tableBodyId) {
+            const tableBody = document.getElementById(tableBodyId);
+            tableBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                // Remove a mensagem 'noData' se houver dados em alguma das tabelas
+                document.getElementById('noData').classList.add('hidden');
+            } else {
+                document.getElementById('noData').classList.add('hidden');
+            }
+
+            const monthNames = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+            data.forEach(item => {
+                const [ano, mes] = item.monthYear.split('-');
+                const monthName = monthNames[parseInt(mes)];
+                const tonziroValorFormatted = item.tonziroValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const airbnbValorFormatted = item.airbnbValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const row = `
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-semibold text-gray-900">${monthName} de ${ano}</td>
+                        <td class="px-6 py-4">${tonziroValorFormatted}</td>
+                        <td class="px-6 py-4">${airbnbValorFormatted}</td>
+                        <td class="px-6 py-4">${item.dias}</td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

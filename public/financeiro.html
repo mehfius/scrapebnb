@@ -54,55 +54,13 @@
         <h1 class="text-xl font-bold text-gray-900">Gerenciador Financeiro</h1>
         <p class="text-sm text-gray-600">Adicione e visualize seus lançamentos</p>
       </div>
-      <a href="#" class="bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm whitespace-nowrap">Resumo</a>
+      <div class="flex space-x-2">
+        <a href="#" class="bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm whitespace-nowrap">Resumo</a>
+        <button id="open-form-modal-btn" class="bg-green-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-green-700 transition-colors text-sm whitespace-nowrap">Novo Lançamento</button>
+      </div>
     </header>
 
-    <!-- Formulário -->
-    <div class="bg-white shadow-md rounded-xl p-6 mb-8 border-2 border-blue-100">
-      <h2 class="text-xl font-semibold text-gray-800 mb-6">Novo Lançamento</h2>
-      <form id="financial-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-        <div class="md:col-span-2">
-          <label for="label" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-          <input type="text" id="label" placeholder="Ex: Salário, Luz, Aluguel..." required class="form-input">
-        </div>
-        <div>
-          <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-          <select id="type" required class="form-select">
-            <option value="receita">Receita</option>
-            <option value="despesa">Despesa</option>
-          </select>
-        </div>
-        <div>
-          <label for="value" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
-          <input type="number" step="0.01" min="0" id="value" required placeholder="0,00" class="form-input">
-        </div>
-        <div>
-          <label for="month" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
-          <select id="month" required class="form-select">
-            <option value="1">Janeiro</option>
-            <option value="2">Fevereiro</option>
-            <option value="3">Março</option>
-            <option value="4">Abril</option>
-            <option value="5">Maio</option>
-            <option value="6">Junho</option>
-            <option value="7">Julho</option>
-            <option value="8">Agosto</option>
-            <option value="9">Setembro</option>
-            <option value="10">Outubro</option>
-            <option value="11">Novembro</option>
-            <option value="12">Dezembro</option>
-          </select>
-        </div>
-        <div>
-          <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
-          <input type="number" id="year" required value="2024" min="2000" max="2100" class="form-input">
-        </div>
-        <div class="md:col-span-2 lg:col-span-6 flex space-x-3 justify-end items-end">
-          <button type="submit" id="submit-btn" class="btn-primary">Adicionar</button>
-          <button type="button" id="cancel-btn" class="btn-secondary hidden">Cancelar</button>
-        </div>
-      </form>
-    </div>
+    
 
     <!-- Lista de lançamentos -->
     <div class="bg-white shadow-md rounded-lg p-6">
@@ -138,6 +96,10 @@
     const noDataMessage = document.getElementById('no-data-message');
     const submitBtn = document.getElementById('submit-btn');
     const cancelBtn = document.getElementById('cancel-btn');
+
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const openFormModalBtn = document.getElementById('open-form-modal-btn');
 
     let supabase;
     let editingId = null;
@@ -305,6 +267,7 @@
           editingId = null;
           cancelBtn.classList.add('hidden');
           fetchData();
+          modalOverlay.classList.add('hidden'); // Close modal
         }
       } else {
         const { error } = await supabase.from('financeiro').insert([transaction]);
@@ -312,6 +275,7 @@
           alert('Lançamento adicionado com sucesso.');
           form.reset();
           fetchData();
+          modalOverlay.classList.add('hidden'); // Close modal
         }
       }
     };
@@ -334,6 +298,7 @@
         document.getElementById('year').value = data.ano;
         editingId = id;
         cancelBtn.classList.remove('hidden');
+        modalOverlay.classList.remove('hidden'); // Open modal
       }
     };
 
@@ -341,6 +306,7 @@
       editingId = null;
       form.reset();
       cancelBtn.classList.add('hidden');
+      modalOverlay.classList.add('hidden'); // Close modal
     };
 
     const handleDelete = async (id) => {
@@ -377,16 +343,89 @@
         editingId = null; // Clear editingId to treat as new entry
         submitBtn.textContent = 'Duplicar Lançamento'; // Change button text
         cancelBtn.classList.remove('hidden');
+        modalOverlay.classList.remove('hidden'); // Open modal
       }
     };
 
     form.addEventListener('submit', handleSubmit);
     cancelBtn.addEventListener('click', handleCancel);
 
+    openFormModalBtn.addEventListener('click', () => {
+      modalOverlay.classList.remove('hidden');
+      form.reset(); // Clear form when opening for new entry
+      editingId = null; // Ensure it's a new entry
+      submitBtn.textContent = 'Adicionar'; // Reset button text
+      cancelBtn.classList.add('hidden'); // Hide cancel button
+    });
+
+    modalCloseBtn.addEventListener('click', () => {
+      modalOverlay.classList.add('hidden');
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        modalOverlay.classList.add('hidden');
+      }
+    });
+
     window.addEventListener('load', async () => {
       await initializeSupabase();
       fetchData();
     });
   </script>
+<!-- Modal Overlay -->
+<div id="modal-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <!-- Modal Content -->
+    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl mx-auto relative">
+        <!-- Close Button -->
+        <button id="modal-close-btn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <!-- Form will go here -->
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Novo Lançamento</h2>
+        <form id="financial-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div class="md:col-span-2">
+                <label for="label" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                <input type="text" id="label" placeholder="Ex: Salário, Luz, Aluguel..." required class="form-input">
+            </div>
+            <div>
+                <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                <select id="type" required class="form-select">
+                    <option value="receita">Receita</option>
+                    <option value="despesa">Despesa</option>
+                </select>
+            </div>
+            <div>
+                <label for="value" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                <input type="number" step="0.01" min="0" id="value" required placeholder="0,00" class="form-input">
+            </div>
+            <div>
+                <label for="month" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
+                <select id="month" required class="form-select">
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div>
+                <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+                <input type="number" id="year" required value="2024" min="2000" max="2100" class="form-input">
+            </div>
+            <div class="md:col-span-2 lg:col-span-6 flex space-x-3 justify-end items-end">
+                <button type="submit" id="submit-btn" class="btn-primary">Adicionar</button>
+                <button type="button" id="cancel-btn" class="btn-secondary hidden">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

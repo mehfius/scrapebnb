@@ -69,7 +69,7 @@
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
         <p class="mt-2">Carregando dados...</p>
       </div>
-      <table id="financial-list" class="min-w-full divide-y divide-gray-200 shadow-sm rounded-lg overflow-hidden">
+      <table id="financial-list" class="min-w-full w-full divide-y divide-gray-200 shadow-sm rounded-lg overflow-hidden">
           
           <tbody class="bg-white divide-y divide-gray-200">
               <!-- Data will be inserted here -->
@@ -259,19 +259,17 @@
           const totalRow = document.createElement('tr');
           totalRow.className = 'bg-gray-100 font-semibold';
           totalRow.innerHTML = `
-              <td colspan="4" class="px-6 py-3 text-right text-xs uppercase tracking-wider">Total do Mês:</td>
-              <td class="px-6 py-3 text-right text-xs uppercase tracking-wider">
+              <td colspan="3" class="px-6 py-3 text-right text-xs uppercase tracking-wider">Total do Mês:</td>
+              <td colspan="3" class="px-6 py-3 text-right text-xs uppercase tracking-wider">
                   ${(monthlyBalance / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} 
               </td>
-              <td class="px-6 py-3"></td> <!-- Empty cell for room column -->
-              <td class="px-6 py-3"></td> <!-- Empty cell for actions column -->
           `;
           tbody.appendChild(totalRow);
 
           // Add a spacing row after each month's total
           const spacingRow = document.createElement('tr');
           spacingRow.className = 'h-4'; // Tailwind class for height
-          spacingRow.innerHTML = `<td colspan="5"></td>`; // Span all columns
+          spacingRow.innerHTML = `<td colspan="6"></td>`; // Span all columns
           tbody.appendChild(spacingRow);
 
           // --- NEW TOTALS LOGIC END ---

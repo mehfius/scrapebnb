@@ -74,7 +74,7 @@
               <tr>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dias</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                   <th scope="col" class="relative px-6 py-3">
                       <span class="sr-only">Ações</span>
@@ -125,6 +125,37 @@
       }
       noDataMessage.classList.add('hidden');
       
+      // --- NEW SORTING LOGIC START ---
+      listings.sort((a, b) => {
+          // Sort by tipo: receita before despesa
+          if (a.tipo === 'receita' && b.tipo === 'despesa') {
+              return -1;
+          }
+          if (a.tipo === 'despesa' && b.tipo === 'receita') {
+              return 1;
+          }
+
+          // If types are the same, sort by label alphabetically
+          if (a.label < b.label) {
+              return -1;
+          }
+          if (a.label > b.label) {
+              return 1;
+          }
+
+          // If types and labels are the same, maintain original created_at order (descending)
+          // This assumes created_at is a string that can be compared directly
+          if (a.created_at > b.created_at) {
+              return -1;
+          }
+          if (a.created_at < b.created_at) {
+              return 1;
+          }
+
+          return 0; // No change in order
+      });
+      // --- NEW SORTING LOGIC END ---
+
       // Group listings by year and month
       const groupedListings = listings.reduce((acc, item) => {
           const key = `${item.ano}-${item.mes}`;
@@ -152,7 +183,7 @@
           const groupHeaderRow = document.createElement('tr');
           groupHeaderRow.className = 'bg-gray-200'; // Styling for group header
           groupHeaderRow.innerHTML = `
-              <td colspan="5" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+              <td colspan="4" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   ${new Date(year, month - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
               </td>
           `;
@@ -181,7 +212,7 @@
                   <div class="text-sm text-gray-900">${item.label}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">${item.mes}/${item.ano}</div>
+                  <div class="text-sm text-gray-900">${item.dias || ''}</div> <!-- Changed from numDias -->
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   ${valorFormatado}
@@ -195,6 +226,30 @@
               
             tbody.appendChild(tableRow); // Append to tbody
           });
+
+          // --- NEW TOTALS LOGIC START ---
+          let totalReceita = 0;
+          let totalDespesa = 0;
+          groupedListings[key].forEach(item => {
+              if (item.tipo === 'receita') {
+                  totalReceita += item.valor;
+              } else if (item.tipo === 'despesa') {
+                  totalDespesa += item.valor;
+              }
+          });
+          const monthlyBalance = totalReceita - totalDespesa;
+
+          const totalRow = document.createElement('tr');
+          totalRow.className = 'bg-gray-100 font-semibold';
+          totalRow.innerHTML = `
+              <td colspan="3" class="px-6 py-3 text-right text-xs uppercase tracking-wider">Total do Mês:</td>
+              <td class="px-6 py-3 text-right text-xs uppercase tracking-wider">
+                  ${(monthlyBalance / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </td>
+              <td class="px-6 py-3"></td> <!-- Empty cell for actions column -->
+          `;
+          tbody.appendChild(totalRow);
+          // --- NEW TOTALS LOGIC END ---
       });
 
       // Event listeners remain the same, as they query the list element
@@ -239,10 +294,11 @@
       const label = document.getElementById('label').value;
       const type = document.getElementById('type').value;
       const valor = parseFloat(document.getElementById('value').value);
+      const dias = parseInt(document.getElementById('dias').value); // Changed from numDias
       const mes = parseInt(document.getElementById('month').value);
       const ano = parseInt(document.getElementById('year').value);
 
-      if (isNaN(valor) || isNaN(mes) || isNaN(ano)) {
+      if (isNaN(valor) || isNaN(dias) || isNaN(mes) || isNaN(ano)) { // Updated
         alert('Preencha todos os campos corretamente.');
         return;
       }
@@ -251,6 +307,7 @@
         label,
         tipo: type,
         valor: Math.round(valor * 100),
+        dias, // Changed from numDias
         mes,
         ano,
         user_id: user.id
@@ -294,6 +351,7 @@
         document.getElementById('label').value = data.label;
         document.getElementById('type').value = data.tipo;
         document.getElementById('value').value = (data.valor / 100).toFixed(2);
+        document.getElementById('dias').value = data.dias; // Changed from numDias
         document.getElementById('month').value = data.mes;
         document.getElementById('year').value = data.ano;
         editingId = id;
@@ -337,6 +395,7 @@
         document.getElementById('label').value = data.label;
         document.getElementById('type').value = data.tipo;
         document.getElementById('value').value = (data.valor / 100).toFixed(2);
+        document.getElementById('dias').value = data.dias; // Changed from numDias
         document.getElementById('month').value = data.mes;
         document.getElementById('year').value = data.ano;
         
@@ -398,6 +457,10 @@
             <div>
                 <label for="value" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
                 <input type="number" step="0.01" min="0" id="value" required placeholder="0,00" class="form-input">
+            </div>
+            <div>
+                <label for="dias" class="block text-sm font-medium text-gray-700 mb-1">Dias</label>
+                <input type="number" id="dias" required min="1" max="99" class="form-input" autocomplete="off">
             </div>
             <div>
                 <label for="month" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>

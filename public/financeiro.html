@@ -111,7 +111,22 @@
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
         <p class="mt-2">Carregando dados...</p>
       </div>
-      <ul id="financial-list" class="space-y-4"></ul>
+      <table id="financial-list" class="min-w-full divide-y divide-gray-200 shadow-sm rounded-lg overflow-hidden">
+          <thead class="bg-gray-50">
+              <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                  <th scope="col" class="relative px-6 py-3">
+                      <span class="sr-only">Ações</span>
+                  </th>
+              </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+              <!-- Data will be inserted here -->
+          </tbody>
+      </table>
       <p id="no-data-message" class="text-center text-gray-500 mt-4 hidden">Nenhum lançamento encontrado.</p>
     </div>
   </div>
@@ -140,7 +155,8 @@
     });
 
     const renderListings = (listings) => {
-      list.innerHTML = '';
+      const tbody = list.querySelector('tbody');
+      tbody.innerHTML = ''; // Clear tbody instead of list directly
       if (!listings.length) {
         noDataMessage.classList.remove('hidden');
         return;
@@ -148,34 +164,44 @@
       noDataMessage.classList.add('hidden');
       
       listings.forEach(item => {
-        const listItem = document.createElement('li');
-        listItem.id = `item-${item.id}`;
+        const tableRow = document.createElement('tr');
+        tableRow.id = `item-${item.id}`;
 
         const isExpense = item.tipo === 'despesa';
-        const valueColor = isExpense ? 'text-red-600' : 'text-green-600';
-        const borderColor = isExpense ? 'border-red-200' : 'border-green-200';
+        // const valueColor = isExpense ? 'text-red-600' : 'text-green-600'; // Removed
 
-        listItem.className = `p-4 border ${borderColor} rounded-lg shadow-sm flex items-center justify-between transition-all hover:shadow-md`;
+        tableRow.className = `${isExpense ? 'bg-red-50' : 'bg-green-50'} hover:bg-gray-100`; // Tailwind classes for table rows
         
         const valorFormatado = (item.valor / 100).toLocaleString('pt-BR', {
           style: 'currency',
           currency: 'BRL'
         });
 
-        listItem.innerHTML = `
-          <div>
-            <h4 class="font-semibold text-gray-800">${item.label}</h4>
-            <p class="text-sm text-gray-500">${item.mes}/${item.ano} - Tipo: <span class="font-medium capitalize">${item.tipo}</span></p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="font-bold text-lg ${valueColor}">${valorFormatado}</span>
-            <button class="btn-edit" data-id="${item.id}">Editar</button>
-            <button class="btn-delete" data-id="${item.id}">Excluir</button>
-          </div>`;
+        tableRow.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                  <div class="text-sm font-medium text-gray-900 capitalize">${item.tipo}</div>
+              </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">${item.label}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">${item.mes}/${item.ano}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              ${valorFormatado}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="btn-edit text-blue-600 hover:text-blue-900" data-id="${item.id}">Editar</button>
+              <button class="btn-delete text-red-600 hover:text-red-900 ml-4" data-id="${item.id}">Excluir</button>
+          </td>
+        `;
           
-        list.appendChild(listItem);
+        tbody.appendChild(tableRow); // Append to tbody
       });
 
+      // Event listeners remain the same, as they query the list element
       list.querySelectorAll('.btn-edit').forEach(btn => btn.addEventListener('click', e => handleEdit(e.currentTarget.dataset.id)));
       list.querySelectorAll('.btn-delete').forEach(btn => btn.addEventListener('click', e => handleDelete(e.currentTarget.dataset.id)));
     };

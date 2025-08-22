@@ -149,7 +149,7 @@
                     const listItem = document.createElement('li');
                     listItem.id = `item-${item.id}`;
                     
-                    const isExpense = item.type === 'despesa';
+                    const isExpense = item.tipo === 'despesa';
                     const icon = isExpense ? 'payments' : 'add_circle';
                     const valueColor = isExpense ? 'text-red-600' : 'text-green-600';
                     const iconColor = isExpense ? 'text-red-500' : 'text-green-500';
@@ -161,11 +161,11 @@
                         <div class="flex-grow">
                             <h4 class="font-semibold text-gray-800">${item.label}</h4>
                             <p class="text-sm text-gray-500">
-                                ${item.month}/${item.year} - Tipo: <span class="font-medium capitalize">${item.type}</span>
+                                ${item.mes}/${item.ano} - Tipo: <span class="font-medium capitalize">${item.tipo}</span>
                             </p>
                         </div>
                         <p class="font-bold text-lg ${valueColor}">
-                            R$ ${item.value.toFixed(2)}
+                            R$ ${((item.valor || 0) / 100).toFixed(2)}
                         </p>
                         <div class="flex space-x-1">
                             <button class="btn-edit" data-id="${item.id}">
@@ -235,16 +235,16 @@
 
             const label = document.getElementById('label').value;
             const type = document.getElementById('type').value;
-            const value = parseFloat(document.getElementById('value').value);
-            const month = parseInt(document.getElementById('month').value);
-            const year = parseInt(document.getElementById('year').value);
+            const valor = parseFloat(document.getElementById('value').value);
+            const mes = parseInt(document.getElementById('month').value);
+            const ano = parseInt(document.getElementById('year').value);
 
-            if (isNaN(value) || isNaN(month) || isNaN(year)) {
+            if (isNaN(valor) || isNaN(mes) || isNaN(ano)) {
                 alert('Por favor, preencha todos os campos com valores válidos.');
                 return;
             }
 
-            const transaction = { label, type, value, month, year, user_id: user.id };
+            const transaction = { label, tipo: type, valor, mes, ano, user_id: user.id };
 
             if (editingId) {
                 // Update
@@ -301,10 +301,10 @@
             }
 
             document.getElementById('label').value = data.label;
-            document.getElementById('type').value = data.type;
-            document.getElementById('value').value = data.value;
-            document.getElementById('month').value = data.month;
-            document.getElementById('year').value = data.year;
+            document.getElementById('type').value = data.tipo;
+            document.getElementById('value').value = data.valor;
+            document.getElementById('month').value = data.mes;
+            document.getElementById('year').value = data.ano;
 
             editingId = id;
             submitBtn.textContent = 'Atualizar Lançamento';

@@ -116,6 +116,15 @@
       checkSupabase();
     });
 
+    const showToast = (message) => {
+        const toast = document.getElementById("toastMessage");
+        toast.textContent = message;
+        toast.classList.add("show");
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 3000); // 3 seconds
+    };
+
     const renderListings = (listings) => {
       const tbody = list.querySelector('tbody');
       tbody.innerHTML = ''; // Clear tbody instead of list directly
@@ -183,11 +192,25 @@
           const groupHeaderRow = document.createElement('tr');
           groupHeaderRow.className = 'bg-gray-200'; // Styling for group header
           groupHeaderRow.innerHTML = `
-              <td colspan="4" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+              <td colspan="5" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   ${new Date(year, month - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
               </td>
           `;
           tbody.appendChild(groupHeaderRow);
+
+          // Add column headers for each month division
+          const columnHeaderRow = document.createElement('tr');
+          columnHeaderRow.className = 'bg-gray-50'; // Styling for column headers
+          columnHeaderRow.innerHTML = `
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Dias</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+              <th scope="col" class="relative px-6 py-3">
+                  <span class="sr-only">Ações</span>
+              </th>
+          `;
+          tbody.appendChild(columnHeaderRow);
 
           // Append items for this group
           groupedListings[key].forEach(item => {
@@ -211,7 +234,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">${item.label}</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-6 py-4 whitespace-nowrap text-right">
                   <div class="text-sm text-gray-900">${item.dias || ''}</div> <!-- Changed from numDias -->
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -287,7 +310,7 @@
       e.preventDefault();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        alert('Faça login para adicionar ou editar lançamentos.');
+        showToast('Faça login para adicionar ou editar lançamentos.');
         return;
       }
 
@@ -299,7 +322,7 @@
       const ano = parseInt(document.getElementById('year').value);
 
       if (isNaN(valor) || isNaN(dias) || isNaN(mes) || isNaN(ano)) { // Updated
-        alert('Preencha todos os campos corretamente.');
+        showToast('Preencha todos os campos corretamente.');
         return;
       }
 
@@ -320,7 +343,7 @@
           .eq('user_id', user.id);
 
         if (!error) {
-          alert('Lançamento atualizado com sucesso.');
+          showToast('Lançamento atualizado com sucesso.');
           editingId = null;
           cancelBtn.classList.add('hidden');
           fetchData();
@@ -329,7 +352,7 @@
       } else {
         const { error } = await supabase.from('financeiro').insert([transaction]);
         if (!error) {
-          alert('Lançamento adicionado com sucesso.');
+          showToast('Lançamento adicionado com sucesso.');
           form.reset();
           fetchData();
           modalOverlay.classList.add('hidden'); // Close modal
@@ -490,5 +513,51 @@
         </form>
     </div>
 </div>
+    <style>
+        .toast-message {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+
+        .toast-message.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+
+    <div id="toastMessage" class="toast-message"></div>
+
 </body>
 </html>

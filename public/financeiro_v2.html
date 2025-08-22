@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela de Lançamentos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2j9/7J44t4x8nE/gTzS7G/L0Fz+6Q5y1qP+6Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .text-green-600 { color: #16a34a; }
+        .bg-green-50 { background-color: #f0fdf4; }
+        .text-red-600 { color: #dc2626; }
+        .bg-red-50 { background-color: #fef2f2; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <!-- Main Container -->
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <h1 class="text-4xl font-bold text-gray-800 text-center">Lançamentos</h1>
+
+        <!-- Mês: Junho de 2025 Card -->
+        <div class="bg-white p-6 rounded-xl shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl" onclick="toggleDetails('junho-details')">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-700">junho de 2025</h2>
+                <div class="flex items-center space-x-4">
+                    <span class="text-xl font-bold text-gray-800">Total: R$ 311,75</span>
+                    <!-- Icon for expand/collapse -->
+                    <svg id="junho-icon" class="w-6 h-6 text-gray-400 transform transition-transform duration-300 rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Collapsible Details for Junho -->
+            <div id="junho-details" class="overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                <div class="pt-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500 rounded-lg overflow-hidden">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Tipo</th>
+                                    <th scope="col" class="px-6 py-3">Descrição</th>
+                                    <th scope="col" class="px-6 py-3">Dias</th>
+                                    <th scope="col" class="px-6 py-3">Valor</th>
+                                    <th scope="col" class="px-6 py-3">Room</th>
+                                    <th scope="col" class="px-6 py-3">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Receitas Junho -->
+                                <tr class="bg-green-50 text-green-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">receita</td>
+                                    <td class="px-6 py-4">Airbnb</td>
+                                    <td class="px-6 py-4">2</td>
+                                    <td class="px-6 py-4">R$ 582,86</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Airbnb', '', 'R$ 582,86', '2')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Airbnb', '', 'R$ 582,86', '2')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-green-50 text-green-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">receita</td>
+                                    <td class="px-6 py-4">Tonziro</td>
+                                    <td class="px-6 py-4">4</td>
+                                    <td class="px-6 py-4">R$ 2.192,85</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Tonziro', '', 'R$ 2.192,85', '4')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Tonziro', '', 'R$ 2.192,85', '4')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Despesas Junho -->
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Condominio</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 1.107,61</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Condominio', '', 'R$ 1.107,61', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Condominio', '', 'R$ 1.107,61', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Internet</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 70,00</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Internet', '', 'R$ 70,00', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Internet', '', 'R$ 70,00', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Jurídico</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 55,00</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Jurídico', '', 'R$ 55,00', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Jurídico', '', 'R$ 55,00', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Lavanderia</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 152,79</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Lavanderia', '', 'R$ 152,79', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Lavanderia', '', 'R$ 152,79', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Plataforma</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 80,00</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Plataforma', '', 'R$ 80,00', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Plataforma', '', 'R$ 80,00', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Serviço Chris</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 700,00</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Serviço Chris', '', 'R$ 700,00', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Serviço Chris', '', 'R$ 700,00', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mês: Julho de 2025 Card -->
+        <div class="bg-white p-6 rounded-xl shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl" onclick="toggleDetails('julho-details')">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-700">julho de 2025</h2>
+                <div class="flex items-center space-x-4">
+                    <span class="text-xl font-bold text-gray-800">Total: R$ 3.256,15</span>
+                    <!-- Icon for expand/collapse -->
+                    <svg id="julho-icon" class="w-6 h-6 text-gray-400 transform transition-transform duration-300 rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Collapsible Details for Julho -->
+            <div id="julho-details" class="overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                <div class="pt-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500 rounded-lg overflow-hidden">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Tipo</th>
+                                    <th scope="col" class="px-6 py-3">Descrição</th>
+                                    <th scope="col" class="px-6 py-3">Dias</th>
+                                    <th scope="col" class="px-6 py-3">Valor</th>
+                                    <th scope="col" class="px-6 py-3">Room</th>
+                                    <th scope="col" class="px-6 py-3">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Receitas Julho -->
+                                <tr class="bg-green-50 text-green-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">receita</td>
+                                    <td class="px-6 py-4">Airbnb</td>
+                                    <td class="px-6 py-4">15</td>
+                                    <td class="px-6 py-4">R$ 4.392,00</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Airbnb', '', 'R$ 4.392,00', '15')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Airbnb', '', 'R$ 4.392,00', '15')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-green-50 text-green-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">receita</td>
+                                    <td class="px-6 py-4">Tonziro</td>
+                                    <td class="px-6 py-4">5</td>
+                                    <td class="px-6 py-4">R$ 2.474,41</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Tonziro', '', 'R$ 2.474,41', '5')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Tonziro', '', 'R$ 2.474,41', '5')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Despesas Julho -->
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Condominio</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 952,79</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Condominio', '', 'R$ 952,79', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Condominio', '', 'R$ 952,79', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Despesa</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 76,16</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Despesa', '', 'R$ 76,16', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Despesa', '', 'R$ 76,16', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Internet</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 70,00</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Internet', '', 'R$ 70,00', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Internet', '', 'R$ 70,00', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Jurídico</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 55,00</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Jurídico', '', 'R$ 55,00', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Jurídico', '', 'R$ 55,00', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Lavanderia</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 556,27</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Lavanderia', '', 'R$ 556,27', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Lavanderia', '', 'R$ 556,27', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600 border-b">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Plataforma</td>
+                                    <td class="px-6 py-4"></td>
+                                    <td class="px-6 py-4">R$ 80,00</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Plataforma', '', 'R$ 80,00', '')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Plataforma', '', 'R$ 80,00', '')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50 text-red-600">
+                                    <td class="px-6 py-4 font-semibold">despesa</td>
+                                    <td class="px-6 py-4">Taxa ocupação</td>
+                                    <td class="px-6 py-4">6</td>
+                                    <td class="px-6 py-4">R$ 298,56</td>
+                                    <td class="px-6 py-4">MI</td>
+                                    <td class="px-6 py-4 flex space-x-2">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Editar', 'Taxa ocupação', '', 'R$ 298,56', '6')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showToast('Exclusão simulada')"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button class="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded-full" onclick="event.stopPropagation(); showModal('Duplicar', 'Taxa ocupação', '', 'R$ 298,56', '6')"><i class="fa-solid fa-clone"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Editar/Duplicar -->
+        <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center z-50">
+            <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-lg mx-4">
+                <h3 id="modalTitle" class="text-2xl font-bold text-gray-800 mb-6 text-center"></h3>
+                <form onsubmit="event.preventDefault(); hideModal(); showToast('Ação simulada com sucesso!');">
+                    <div class="mb-4">
+                        <label for="tipoInput" class="block text-gray-700 font-semibold mb-2">Tipo</label>
+                        <select id="tipoInput" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                            <option value="receita">Receita</option>
+                            <option value="despesa">Despesa</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="descricaoInput" class="block text-gray-700 font-semibold mb-2">Descrição</label>
+                        <input type="text" id="descricaoInput" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="valorInput" class="block text-gray-700 font-semibold mb-2">Valor</label>
+                        <input type="text" id="valorInput" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="diasInput" class="block text-gray-700 font-semibold mb-2">Dias</label>
+                        <input type="number" id="diasInput" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="hideModal()" class="px-6 py-2 rounded-full font-semibold text-gray-600 hover:bg-gray-200 transition-all duration-200">Cancelar</button>
+                        <button type="submit" class="px-6 py-2 rounded-full font-semibold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-200">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toast de Notificação -->
+        <div id="toast" class="fixed bottom-6 right-6 px-6 py-3 bg-gray-800 text-white rounded-lg shadow-xl opacity-0 transition-opacity duration-300">
+            Ação realizada com sucesso!
+        </div>
+    </div>
+
+    <script>
+        function toggleDetails(id) {
+            const detailsElement = document.getElementById(id);
+            const contentElement = detailsElement.querySelector('div');
+            const iconElement = document.getElementById(id.replace('-details', '-icon'));
+            
+            if (detailsElement.style.maxHeight === '0px' || detailsElement.style.maxHeight === '') {
+                detailsElement.style.maxHeight = contentElement.scrollHeight + 'px';
+                iconElement.classList.remove('rotate-0');
+                iconElement.classList.add('rotate-180');
+            } else {
+                detailsElement.style.maxHeight = '0px';
+                iconElement.classList.remove('rotate-180');
+                iconElement.classList.add('rotate-0');
+            }
+        }
+
+        function showModal(action, descricao, tipo, valor, dias) {
+            const modal = document.getElementById('editModal');
+            const title = document.getElementById('modalTitle');
+            const descricaoInput = document.getElementById('descricaoInput');
+            const valorInput = document.getElementById('valorInput');
+            const diasInput = document.getElementById('diasInput');
+            const tipoInput = document.getElementById('tipoInput');
+
+            title.innerText = action === 'Editar' ? 'Editar Lançamento' : 'Duplicar Lançamento';
+            descricaoInput.value = descricao;
+            valorInput.value = valor;
+            diasInput.value = dias;
+            tipoInput.value = tipo;
+
+            modal.style.display = 'flex';
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('editModal');
+            modal.style.display = 'none';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

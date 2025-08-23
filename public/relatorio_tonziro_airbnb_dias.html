@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela Financeira Mensal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2j9/7J44t4x8nE/gTzS7G/L0Fz+6Q5y1qP+6Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://scrapebnb.vercel.app/js/supabase_auth_airbnb.js"></script>
+</head>
+<body class="p-6 md:p-12">
+
+    <div class="max-w-4xl mx-auto space-y-10">
+        <h1 class="text-4xl font-bold text-gray-800 text-center">Tabela de Análise Mensal</h1>
+        
+        <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Morada de Israel <span id="moradaIsraelAno" class="text-gray-500 font-normal text-xl"></span></h2>
+            <table class="w-full text-sm text-left text-gray-500 rounded-lg overflow-hidden">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Mês</th>
+                        <th scope="col" class="px-6 py-3 text-right">Tonziro</th>
+                        <th scope="col" class="px-6 py-3 text-right">Airbnb</th>
+                        <th scope="col" class="px-6 py-3 text-right">Despesa</th>
+                        <th scope="col" class="px-6 py-3 text-right">Lucro</th>
+                        <th scope="col" class="px-6 py-3 text-right">Ocupação</th>
+                    </tr>
+                </thead>
+                <tbody id="moradaIsraelTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Monte Sião <span id="monteSiaoAno" class="text-gray-500 font-normal text-xl"></span></h2>
+            <table class="w-full text-sm text-left text-gray-500 rounded-lg overflow-hidden">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Mês</th>
+                        <th scope="col" class="px-6 py-3 text-right">Tonziro</th>
+                        <th scope="col" class="px-6 py-3 text-right">Airbnb</th>
+                        <th scope="col" class="px-6 py-3 text-right">Despesa</th>
+                        <th scope="col" class="px-6 py-3 text-right">Lucro</th>
+                        <th scope="col" class="px-6 py-3 text-right">Ocupação</th>
+                    </tr>
+                </thead>
+                <tbody id="monteSiaoTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bg-amber-100 p-6 rounded-xl shadow-lg border-l-4 border-amber-500">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Tipos de Despesas</h2>
+            <p id="expenseText" class="text-gray-600">
+            </p>
+        </div>
+
+        <div id="loading" class="text-center text-gray-500 hidden">
+            <i class="fa-solid fa-spinner fa-spin-pulse fa-2xl"></i>
+            <p class="mt-2">Carregando dados da tabela...</p>
+        </div>
+        
+        <div id="noData" class="text-center text-gray-500 hidden">
+            <p class="text-xl">Nenhum dado encontrado para exibir.</p>
+        </div>
+
+    </div>
+
+    <script>
+        let userId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await new Promise(resolve => {
+                const checkSupabase = setInterval(() => {
+                    if (window.supabase) {
+                        clearInterval(checkSupabase);
+                        resolve();
+                    }
+                }, 50);
+            });
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                userId = user.id;
+                await loadDataAndExpenses();
+            } else {
+                console.error('Usuário não autenticado.');
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('noData').classList.remove('hidden');
+            }
+        });
+
+        async function loadDataAndExpenses() {
+            if (!userId) {
+                console.error('ID do usuário não encontrado.');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const { data, error } = await supabase
+                    .from('view_relatorio_simples')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('ano', { ascending: true })
+                    .order('mes', { ascending: true });
+
+                if (error) throw error;
+
+                const allExpenses = await fetchAllExpenses();
+                
+                const dataMoradaIsrael = data.filter(item => item.propriedade === 'Morada de Israel');
+                const dataMonteSiao = data.filter(item => item.propriedade === 'Monte Sião');
+                
+                renderTable(dataMoradaIsrael, 'moradaIsraelTableBody', 'moradaIsraelAno');
+                renderTable(dataMonteSiao, 'monteSiaoTableBody', 'monteSiaoAno');
+                
+                renderExpenses(allExpenses);
+
+            } catch (error) {
+                console.error('Erro ao carregar os dados:', error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function fetchAllExpenses() {
+            const { data, error } = await supabase
+                .from('financeiro')
+                .select('label')
+                .eq('user_id', userId)
+                .eq('tipo', 'despesa')
+                .order('label', { ascending: true });
+
+            if (error) throw error;
+            return data || [];
+        }
+
+        function renderTable(data, tableBodyId, anoElementId) {
+            const tableBody = document.getElementById(tableBodyId);
+            tableBody.innerHTML = '';
+            
+            if (data.length > 0) {
+                document.getElementById(anoElementId).innerText = `(${data[0].ano})`;
+            } else {
+                document.getElementById(anoElementId).innerText = '';
+            }
+
+            const today = new Date();
+            const currentDay = today.getDate();
+            const currentMonth = today.getMonth() + 1;
+            const currentYear = today.getFullYear();
+            
+            const filteredData = data.filter(item => {
+                const ano = item.ano;
+                const mes = item.mes;
+                
+                if (ano < currentYear) {
+                    return true;
+                }
+                if (ano === currentYear && mes < currentMonth) {
+                    return true;
+                }
+                if (ano === currentYear && mes === currentMonth - 1 && currentDay > 20) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (filteredData.length === 0) {
+                document.getElementById('noData').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('noData').classList.add('hidden');
+            }
+
+            const monthNames = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+            filteredData.forEach(item => {
+                const monthName = monthNames[item.mes];
+                const tonziroValorFormatted = (item.tonziro / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const airbnbValorFormatted = (item.airbnb / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const despesaValorFormatted = (item.despesa / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const lucroValorFormatted = (item.lucro / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                
+                const lucroColorClass = item.lucro >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold';
+                
+                const row = `
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-semibold text-gray-900">${monthName}</td>
+                        <td class="px-6 py-4 text-right">${tonziroValorFormatted}</td>
+                        <td class="px-6 py-4 text-right">${airbnbValorFormatted}</td>
+                        <td class="px-6 py-4 text-right">${despesaValorFormatted}</td>
+                        <td class="px-6 py-4 text-right ${lucroColorClass}">${lucroValorFormatted}</td>
+                        <td class="px-6 py-4 text-right">${item.ocupacao}</td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+        
+        function renderExpenses(expenses) {
+            const expenseText = document.getElementById('expenseText');
+            
+            const uniqueExpenses = [...new Set(expenses.map(expense => expense.label))];
+            
+            if (uniqueExpenses.length === 0) {
+                expenseText.textContent = 'Nenhum tipo de despesa encontrado.';
+                return;
+            }
+            
+            const expenseString = "Os tipos de despesas são: " + uniqueExpenses.join(', ') + '.';
+            expenseText.textContent = expenseString;
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

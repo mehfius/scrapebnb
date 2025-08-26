@@ -90,25 +90,24 @@
             }
         }
 
-        /* Estilos para o marcador de preço customizado */
         .price-marker {
-            background-color: rgba(59, 130, 246, 0.4); /* Cor do cluster com transparência */
+            background-color: rgba(59, 130, 246, 0.4); 
             background-clip: padding-box;
-            border-radius: 50%; /* Torna o contêiner externo circular */
-            width: 40px; /* Largura do contêiner externo */
-            height: 40px; /* Altura do contêiner externo */
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: none;
         }
         .price-marker span {
-            background-color: #3b82f6; /* Cor sólida do marcador simples */
-            border-radius: 50%; /* Torna o círculo interno */
-            width: 30px; /* Largura do círculo interno */
-            height: 30px; /* Altura do círculo interno */
+            background-color: #3b82f6; 
+            border-radius: 50%; 
+            width: 30px; 
+            height: 30px; 
             color: #ffffff;
-            font-size: 9px; /* Fonte ainda menor */
+            font-size: 9px; 
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -125,23 +124,21 @@
         .price-marker::after {
             content: none;
         }
-        /* Estilo para a borda do marcador tagged */
         .price-marker.tagged-marker {
-            background-color: rgba(250, 204, 21, 0.4); /* Cor amarela com transparência */
-            border: 2px solid #f59e0b; /* amber-500 */
+            background-color: rgba(250, 204, 21, 0.4); 
+            border: 2px solid #f59e0b; 
         }
         .price-marker.tagged-marker span {
-            background-color: #facc15; /* amber-400 */
-            color: #111827; /* gray-900 */
+            background-color: #facc15; 
+            color: #111827; 
         }
         .price-marker.tagged-marker.selected {
             background-color: rgba(250, 204, 21, 0.8);
             animation: pulsate-effect-tagged 2s infinite;
         }
         
-        /* Estilo para o marcador simples (zoom out) - replicando o visual do cluster */
         .simple-marker {
-            background-color: rgba(59, 130, 246, 0.4); /* Cor do cluster com transparência */
+            background-color: rgba(59, 130, 246, 0.4); 
             background-clip: padding-box;
             border-radius: 20px;
         }
@@ -158,18 +155,18 @@
             border-radius: 15px;
             font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
             color: white;
-            background-color: #3b82f6; /* Cor sólida interna */
+            background-color: #3b82f6; 
             line-height:30px;
         }
         
         .image-loading-container {
             position: relative;
             width: 100%;
-            height: 192px; /* Altura da imagem */
+            height: 192px; 
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #e2e8f0; /* gray-200 */
+            background-color: #e2e8f0; 
             border-radius: 0.5rem;
         }
         .image-loading-container img.hidden {
@@ -189,8 +186,8 @@
         }
         #listing-sidebar-content .selected {
             animation: pulsate-sidebar-item 2s infinite;
-            border-color: #3b82f6; /* blue-600 */
-            background-color: #eff6ff; /* blue-50 */
+            border-color: #3b82f6; 
+            background-color: #eff6ff; 
         }
     </style>
 </head>
@@ -250,6 +247,7 @@
             if (options.innerHTML) el.innerHTML = options.innerHTML;
             if (options.type) el.type = options.type;
             if (options.value) el.value = options.value;
+            if (options.href) el.href = options.href;
             if (options.dataset) {
                 for (const key in options.dataset) {
                     el.dataset[key] = options.dataset[key];
@@ -297,6 +295,7 @@
         const eLogo = createElement('img', { className: 'w-[200px] h-auto' });
         eLogo.src = 'https://scrapebnb.vercel.app/img/scrapebnb.jpg';
         const airbnb = createElement('a', { innerHTML: 'Ver no Airbnb', className: `bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm whitespace-nowrap` });
+        const eMainMenuBtn = createElement('a', { href: '/', innerHTML: 'Menu Principal', className: 'bg-gray-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-700 transition-colors text-sm whitespace-nowrap' });
         
         const eDateControlContainer = createElement('div', { className: 'flex items-center border border-gray-300 rounded-lg overflow-hidden' });
         const ePrevDayBtn = createElement('button', { id: 'prev-day-btn', className: 'py-[9px] px-2.5 bg-gray-50 hover:bg-gray-100 transition-colors border-r border-gray-300' });
@@ -338,10 +337,12 @@
         
         const eHeaderLeft = createElement('div', { className: 'flex items-center gap-4' });
         const eHeaderCenter = createElement('div', { className: 'flex items-center gap-2' });
+        const eHeaderRight = createElement('div', { className: 'flex items-center gap-2' });
 
         eHeaderLeft.append(eLogo);
         eHeaderCenter.append(eDateControlContainer, eJobSelectContainer);
-        eHeader.append(eHeaderLeft, eHeaderCenter, airbnb);
+        eHeaderRight.append(eMainMenuBtn, airbnb);
+        eHeader.append(eHeaderLeft, eHeaderCenter, eHeaderRight);
 
         const resetHighlights = () => {
             if (previousMarker) {
@@ -641,14 +642,12 @@
                 markersLayer.eachLayer(marker => {
                     const location = currentLocations.find(loc => loc.marker === marker);
                     if (location) {
-                        // Reset all markers to their default state
                         if (location.marker) {
                             const newIcon = currentZoom >= zoomThreshold ? createPriceMarkerIcon(location.average_price_per_night || 'N/A', location.tagged, false) : createSimpleMarkerIcon(false);
                             location.marker.setIcon(newIcon);
                         }
                     }
                 });
-                // Re-apply highlight to the previously selected marker, if any
                 if(previousMarker) {
                     const location = currentLocations.find(loc => loc.marker === previousMarker);
                     if(location) {

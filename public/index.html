@@ -29,22 +29,6 @@
     </style>
 </head>
 <body class="bg-white">
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-        const SUPABASE_URL = 'https://xwejzglvqsiydycvivys.supabase.co/';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3ZWp6Z2x2cXNpeWR5Y3ZpdnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyNDgzOTQsImV4cCI6MjA1NzgyNDM5NH0.32ClzsWEgc_XdqXD4d8i7_AO4SOIjKjzQCPb_SjJBoU';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        async function checkSessionAndRedirect() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                window.location.href = 'index_cards.html';
-            } else {
-                window.location.href = 'login.html';
-            }
-        }
-        checkSessionAndRedirect();
-    </script>
     <div class="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <!-- LOGIN -->
         <div id="login-container" class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl">

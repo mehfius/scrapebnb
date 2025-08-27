@@ -33,8 +33,8 @@
         <!-- LOGIN -->
         <div id="login-container" class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl">
             <div class="text-center">
-                <img class="w-auto h-24 mx-auto" src="img/scrapebnb.jpg" alt="Scrapebnb Logo">
-                <h2 id="form-title" class="mt-6 text-3xl font-bold text-gray-900">
+                <img class="w-auto h-auto mx-auto" src="img/scrapebnb.jpg" alt="Scrapebnb Logo">
+                <h2 id="form-title" class="mt-6 text-2xl font-bold text-gray-900">
                     Acesse sua conta
                 </h2>
                 <p id="form-subtitle" class="mt-2 text-sm text-gray-600">
@@ -54,7 +54,7 @@
         <!-- USUÁRIO LOGADO -->
         <div id="user-info-container" class="hidden w-full max-w-md p-8 space-y-6 bg-white rounded-xl">
             <div class="text-center">
-                <img class="w-auto h-24 mx-auto mb-4" src="img/scrapebnb.jpg" alt="Scrapebnb Logo">
+                <img class="w-auto h-auto mx-auto mb-4" src="img/scrapebnb.jpg" alt="Scrapebnb Logo">
                 <img id="user-avatar" class="w-24 h-24 mx-auto rounded-full border-2 border-gray-300 shadow-md" src="https://placehold.co/96x96/6366f1/ffffff?text=User" alt="User Avatar">
                 <h2 id="user-name" class="mt-6 text-3xl font-bold text-gray-900"></h2>
                 <p id="user-email" class="mt-2 text-sm text-gray-600"></p>
@@ -139,6 +139,8 @@
                     if (session?.user) {
                         console.log('Usuário da sessão:', session.user);
                         showUserInfo(session.user);
+
+                        
                     } else {
                         if (event === 'INITIAL_SESSION') {
                             console.log('Nenhuma sessão encontrada, mostrando login');
@@ -162,6 +164,8 @@
             });
 
         });
+
+        
     </script>
 </body>
 </html>

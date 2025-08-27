@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/map", "destination": "/index_maps.html" },
-    { "source": "/cards", "destination": "/contact.html" }
+    { "source": "/cards", "destination": "/contact.html" },
+    { "source": "/myrooms", "destination": "/myrooms.html" }    
   ]
 }

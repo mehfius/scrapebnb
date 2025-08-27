@@ -12,7 +12,7 @@ const buildGraphQLRequest = (locationString, checkin, checkout, adults = 1, page
         { filterName: "datePickerType", filterValues: ["calendar"] },
         { filterName: "itemsPerGrid", filterValues: ["18"] },
         { filterName: "priceFilterInputType", filterValues: ["2"] },
-        { filterName: "priceFilterNumNights", filterValues: ["1"] },
+        { filterName: "priceFilterNumNights", filterValues: ["3"] },
         // Use the location string directly here
         { filterName: "query", filterValues: [locationString] },
         { filterName: "refinementPaths", filterValues: ["/homes"] },

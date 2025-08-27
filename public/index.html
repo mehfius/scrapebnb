@@ -75,97 +75,19 @@
     <script src="js/supabase_auth_airbnb.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const loginContainer = document.getElementById('login-container');
-            const userInfoContainer = document.getElementById('user-info-container');
             const googleLoginButton = document.getElementById('google-login-button');
-            const notificationArea = document.getElementById('notification-area');
             const logoutButton = document.getElementById('logout-button');
-            const userAvatar = document.getElementById('user-avatar');
-            const userName = document.getElementById('user-name');
-            const userEmail = document.getElementById('user-email');
 
-            const setLoading = (button, isLoading) => {
-                const buttonText = button.querySelector('.button-text');
-                const spinner = button.querySelector('.spinner');
-                if (isLoading) {
-                    button.disabled = true;
-                    if (buttonText) buttonText.classList.add('hidden');
-                    if (spinner) spinner.classList.remove('hidden');
-                } else {
-                    button.disabled = false;
-                    if (buttonText) buttonText.classList.remove('hidden');
-                    if (spinner) spinner.classList.add('hidden');
-                }
-            };
-
-            const showNotification = (message, type) => {
-                notificationArea.textContent = message;
-                notificationArea.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
-                notificationArea.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
-            };
-
-            const showUserInfo = (user) => {
-                loginContainer.classList.add('hidden');
-                userInfoContainer.classList.remove('hidden');
-                userName.textContent = `Bem-vindo, ${user.user_metadata?.full_name || user.email || 'Usuário'}`;
-                userEmail.textContent = user.email || 'Email não disponível';
-                userAvatar.src = user.user_metadata?.avatar_url || 'img/scrapebnb.jpg';
-
-            };
-
-            const showLoginForm = () => {
-                loginContainer.classList.remove('hidden');
-                userInfoContainer.classList.add('hidden');
-            };
-
-            googleLoginButton.addEventListener('click', async () => {
-                setLoading(googleLoginButton, true);
-                const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-                if (error) {
-                    showNotification(`Erro no login com Google: ${error.message}`, 'error');
-                    setLoading(googleLoginButton, false);
-                }
+            googleLoginButton.addEventListener('click', () => {
+                globalThis.auth.handleLogin('google');
             });
 
-            logoutButton.addEventListener('click', async () => {
-                await supabase.auth.signOut();
-            });
-
-            // 🔥 Aqui a correção
-            supabase.auth.onAuthStateChange(async (event, session) => {
-                console.log('onAuthStateChange evento:', event, 'session:', session);
-
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-                    if (session?.user) {
-                        console.log('Usuário da sessão:', session.user);
-                        showUserInfo(session.user);
-
-                        
-                    } else {
-                        if (event === 'INITIAL_SESSION') {
-                            console.log('Nenhuma sessão encontrada, mostrando login');
-                            showLoginForm();
-                            return;
-                        }
-
-                        console.log('Tentando pegar usuário via getUser()...');
-                        const { data, error } = await supabase.auth.getUser();
-                        if (error || !data?.user) {
-                            console.error('Erro ao obter usuário:', error);
-                            showLoginForm();
-                        } else {
-                            showUserInfo(data.user);
-                        }
-                    }
-                } else if (event === 'SIGNED_OUT') {
-                    console.log('Evento de SIGNED_OUT');
-                    showLoginForm();
-                }
-            });
-
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    globalThis.auth.handleLogout();
+                });
+            }
         });
-
-        
     </script>
 </body>
 </html>

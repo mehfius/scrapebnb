@@ -1,0 +1,45 @@
+{
+    "info": {
+        "_postman_id": "a8f5f8a0-c1b3-4b2e-8b0a-9b7a3d6e4f1f",
+        "name": "Scrapebnb API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "List Rooms",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"location\": \"Belo Horizonte, Minas Gerais\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "http://localhost:3000/api/listrooms",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "api",
+                        "listrooms"
+                    ]
+                },
+                "description": "Executa o scraping de uma página de resultados do Airbnb com base em uma string de localização."
+            },
+            "response": []
+        }
+    ]
+}

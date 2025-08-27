@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Quartos - Scrapebnb</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-2xl font-bold text-gray-800">Gerenciar Quartos</h1>
+                <a href="/painel" class="flex items-center text-sm font-medium text-gray-600 hover:text-indigo-500">
+                    <i class="material-icons mr-1">arrow_back</i>
+                    Voltar ao Painel
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            
+            <!-- Passo 1: Adicionar Novo Quarto -->
+            <section id="add-room-section" class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Adicionar Novo Quarto</h2>
+                <p class="text-gray-600 mb-4">Passo 1: Selecione uma localização para buscar quartos disponíveis.</p>
+                <div id="locations-container" class="flex flex-wrap gap-3"></div>
+            </section>
+
+            <!-- Passo 2: Selecionar Quarto da Lista -->
+            <section id="scraped-rooms-section" class="hidden bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Passo 2: Selecione um quarto para adicionar</h2>
+                <div id="scraped-rooms-container" class="space-y-4"></div>
+            </section>
+
+            <!-- Seção Meus Quartos -->
+            <section>
+                 <h2 class="text-xl font-bold text-gray-800 mb-4">Meus Quartos</h2>
+                <div id="rooms-container" class="bg-white rounded-lg shadow p-6 space-y-4">
+                    <p id="rooms-loading-state" class="text-center text-gray-500">Carregando seus quartos...</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase_auth_airbnb.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const roomsContainer = document.getElementById('rooms-container');
+            const roomsLoadingState = document.getElementById('rooms-loading-state');
+            const locationsContainer = document.getElementById('locations-container');
+            const scrapedRoomsSection = document.getElementById('scraped-rooms-section');
+            const scrapedRoomsContainer = document.getElementById('scraped-rooms-container');
+
+            let currentUser = null;
+
+            const initUser = async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                currentUser = user;
+            };
+
+            const addRoomToUser = async (roomId) => {
+                if (!currentUser) {
+                    alert("Você precisa estar logado para adicionar um quarto.");
+                    return;
+                }
+                console.log(`Adicionando quarto ${roomId} para o usuário ${currentUser.id}`);
+                
+                const { data, error } = await supabase
+                    .from('users_rooms')
+                    .insert([{ user_id: currentUser.id, room: roomId }]);
+
+                if (error) {
+                    console.error("Erro ao adicionar quarto:", error);
+                    alert(`Erro ao adicionar quarto: ${error.message}`);
+                } else {
+                    alert(`Quarto ${roomId} adicionado com sucesso!`);
+                    fetchRooms(); // Atualiza a lista de quartos
+                    scrapedRoomsSection.classList.add('hidden'); // Esconde a seção de resultados
+                }
+            };
+
+            const fetchScrapedRooms = async (locationLabel) => {
+                scrapedRoomsSection.classList.remove('hidden');
+                scrapedRoomsContainer.innerHTML = `<p class="text-center text-gray-500">Buscando quartos em ${locationLabel}...</p>`;
+
+                const checkin = new Date();
+                const checkout = new Date();
+                checkin.setDate(checkin.getDate() + 1); // Check-in amanhã
+                checkout.setDate(checkout.getDate() + 2); // Checkout depois de amanhã
+
+                const formatDate = (date) => date.toISOString().split('T')[0];
+
+                const apiBody = {
+                    config: { tag: locationLabel, adults: 1, min_bedrooms: 0, price_max: 10000, amenities: [] },
+                    checkin: formatDate(checkin),
+                    checkout: formatDate(checkout),
+                    pageNumber: 0
+                };
+
+                try {
+                    const response = await fetch('/api/listrooms', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(apiBody)
+                    });
+
+                    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+
+                    const result = await response.json();
+                    scrapedRoomsContainer.innerHTML = '';
+
+                    if (result.data && result.data.length > 0) {
+                        result.data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'p-3 bg-gray-50 rounded-lg flex justify-between items-center';
+                            div.innerHTML = `
+                                <div>
+                                    <span class="font-medium text-gray-800">Quarto ID: ${item.room}</span>
+                                    <span class="text-gray-500 ml-4">Preço: R$${item.price || 'N/A'}</span>
+                                </div>
+                                <button data-room-id="${item.room}" class="add-room-btn px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium">Adicionar</button>
+                            `;
+                            scrapedRoomsContainer.appendChild(div);
+                        });
+
+                        document.querySelectorAll('.add-room-btn').forEach(button => {
+                            button.addEventListener('click', (e) => {
+                                const roomId = e.target.dataset.roomId;
+                                addRoomToUser(roomId);
+                            });
+                        });
+
+                    } else {
+                        scrapedRoomsContainer.innerHTML = `<p class="text-center text-gray-600">Nenhum quarto encontrado para esta localização.</p>`;
+                    }
+                } catch (error) {
+                    console.error("Falha ao buscar quartos da API:", error);
+                    scrapedRoomsContainer.innerHTML = `<p class="text-center text-red-500">Erro ao buscar quartos. Tente novamente.</p>`;
+                }
+            };
+
+            const loadLocations = async () => {
+                const { data: locations, error } = await supabase.from('locations').select('id, label');
+                if (error) return;
+                locationsContainer.innerHTML = '';
+                locations.forEach(location => {
+                    const button = document.createElement('button');
+                    button.className = 'px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 font-medium transition-colors';
+                    button.textContent = location.label;
+                    button.addEventListener('click', () => fetchScrapedRooms(location.label));
+                    locationsContainer.appendChild(button);
+                });
+            };
+
+            const fetchRooms = async () => {
+                if (!currentUser) return;
+                const { data: rooms, error } = await supabase.from('users_rooms').select('room::text').eq('user_id', currentUser.id);
+                roomsLoadingState.remove();
+                roomsContainer.innerHTML = '';
+                if (error) return;
+                if (rooms.length === 0) {
+                    roomsContainer.innerHTML = `<p class="text-center text-gray-600">Você ainda não adicionou nenhum quarto.</p>`;
+                    return;
+                }
+                const roomList = document.createElement('ul');
+                roomList.className = 'divide-y divide-gray-200';
+                rooms.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'py-4 flex items-center';
+                    li.innerHTML = `<i class="material-icons text-gray-500 mr-4">hotel</i><span class="text-lg text-gray-800">${item.room}</span>`;
+                    roomList.appendChild(li);
+                });
+                roomsContainer.appendChild(roomList);
+            };
+
+            const init = async () => {
+                await initUser();
+                loadLocations();
+                fetchRooms();
+            };
+
+            init();
+        });
+    </script>
+</body>
+</html>

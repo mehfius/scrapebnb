@@ -166,7 +166,7 @@ export default async function handler(req, res) {
             picture: pictures
         };
 
-        const logsDir = path.join(process.cwd(), 'tmp', 'log');
+        const logsDir = path.join('/tmp', 'log');
         const timestamp = format(new Date(), 'yyyy-MM-dd-HH-mm-ss');
         const filename = `${timestamp}.json`;
         const filepath = path.join(logsDir, filename);

@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
     "date-fns": "^2.0.0"
   }
 }

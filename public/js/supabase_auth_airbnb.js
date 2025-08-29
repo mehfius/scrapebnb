@@ -4,7 +4,6 @@ globalThis.auth.SUPABASE_URL = "https://xwejzglvqsiydycvivys.supabase.co/";
 
 globalThis.supabase = window.supabase.createClient(globalThis.auth.SUPABASE_URL, globalThis.auth.SUPABASE_ANON_KEY);
 
-// Funções auxiliares para UI (usadas na página de login)
 const showLoginForm = () => {
     const loginContainer = document.getElementById('login-container');
     const userInfoContainer = document.getElementById('user-info-container');
@@ -14,45 +13,59 @@ const showLoginForm = () => {
     }
 };
 
-// Listener central de autenticação
-supabase.auth.onAuthStateChange((event, session) => {
+supabase.auth.onAuthStateChange(async (event, session) => {
     const currentPage = window.location.pathname;
-    // A página de login é a raiz ou /index.html
     const isLoginPage = currentPage === '/' || currentPage.endsWith('/index.html');
+    const isWizardPage = currentPage.startsWith('/wizard');
     const user = session?.user;
-
+  
     if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+       
         if (user) {
-            // Usuário está logado.
-            if (isLoginPage) {
-                // Se estiver na página de login, redireciona para /myrooms.
-                window.location.href = '/painel';
+         
+            const { data: userRooms, error } = await supabase
+                .from('users_rooms')
+                .select('id')
+                .eq('user_id', user.id)
+                .limit(1);
+         console.log(userRooms.length)
+            if (error) {
+                console.error('Error checking user rooms:', error);
+                // Se der erro, e estiver na pág de login, vai pro painel. Senão, fica onde está.
+                if (isLoginPage) window.location.href = '/painel';
+            } else if (userRooms && userRooms.length === 0) {
+                // Usuário logado, mas SEM salas.
+                // Se ele NÃO estiver já no wizard, redireciona para lá.
+                if (!isWizardPage) {
+                    window.location.href = '/wizard/myrooms';
+                }
+            } else {
+                // Usuário logado e COM salas.
+                // Se ele estiver na página de login, redireciona para o painel.
+                if (isLoginPage) {
+                    window.location.href = '/painel';
+                }
             }
-            // Se estiver em outra página (ex: /myrooms), não faz nada.
         } else {
+        
             // Usuário não está logado.
+            // Se não estiver na pág de login, redireciona para lá.
             if (!isLoginPage) {
-                // Se não estiver na página de login, redireciona para lá.
                 window.location.href = '/';
             } else {
-                // Se já está na página de login, mostra o formulário.
                 showLoginForm();
             }
         }
     } else if (event === 'SIGNED_OUT') {
-        // Usuário deslogou.
         if (!isLoginPage) {
-            // Se não estiver na página de login, redireciona para lá.
             window.location.href = '/';
         } else {
-            // Se já está na página de login, mostra o formulário.
             showLoginForm();
         }
     }
 });
 
 
-// Funções globais para serem usadas pelos botões no HTML
 globalThis.auth.handleLogin = async (provider) => {
     const button = document.getElementById(`google-login-button`);
     if(button) {

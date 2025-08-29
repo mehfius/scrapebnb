@@ -2,7 +2,7 @@ import { format, addDays } from 'date-fns';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-const buildGraphQLRequest = (locationString, checkin, checkout, adults, minBedrooms, cursor = null) => {
+const buildGraphQLRequest = (locationString, checkin, checkout, adults, minBedrooms, amenities, cursor = null) => {
     const rawParams = [
         { filterName: "adults", filterValues: [String(adults)] },
         { filterName: "minBedrooms", filterValues: [String(minBedrooms)] },
@@ -31,6 +31,13 @@ const buildGraphQLRequest = (locationString, checkin, checkout, adults, minBedro
         rawParams.push({
             filterName: "selectedFilterOrder",
             filterValues: [`min_bedrooms:${minBedrooms}`]
+        });
+    }
+
+    if (amenities && amenities.length > 0) {
+        rawParams.push({
+            filterName: "amenities",
+            filterValues: amenities.map(String)
         });
     }
 
@@ -131,7 +138,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { location, adults, min_bedrooms } = req.body;
+        const { location, adults, min_bedrooms, amenities } = req.body;
 
         if (!location || typeof location !== 'string') {
             return res.status(400).json({ error: 'Missing or invalid parameter: \'location\' must be a string.' });
@@ -145,7 +152,7 @@ export default async function handler(req, res) {
         const checkin = format(addDays(today, 1), 'yyyy-MM-dd');
         const checkout = format(addDays(today, 2), 'yyyy-MM-dd');
 
-        const graphqlRequest = buildGraphQLRequest(location, checkin, checkout, adults, min_bedrooms);
+        const graphqlRequest = buildGraphQLRequest(location, checkin, checkout, adults, min_bedrooms, amenities);
 
         const requestOptions = {
             method: "POST",

@@ -82,7 +82,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://scrapebnb.vercel.app/js/supabase_auth_airbnb.js"></script>
+    <script src="js/supabase_auth_airbnb.js"></script>
     <script>
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -265,7 +265,9 @@
             };
 
             const loadLocations = async () => {
+     
                 const { data: locations, error } = await supabase.from('locations').select('id, label, tag');
+               
                 if (error) return;
                 locationsContainer.innerHTML = '';
                 locations.forEach(location => {
@@ -280,6 +282,7 @@
 
             const fetchRooms = async () => {
                 if (!currentUser) return;
+                
                 const { data: rooms, error } = await supabase.from('users_rooms').select('room::text, url').eq('user_id', currentUser.id);
                 
                 if(roomsLoadingState) roomsLoadingState.remove();
@@ -333,7 +336,7 @@
                 }
             });
 
-            const init = async () => {
+            const init = async () => {      
                 await initUser();
                 await loadLocations();
                 await fetchRooms();

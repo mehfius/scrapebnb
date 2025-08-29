@@ -3,7 +3,8 @@
     { "source": "/map", "destination": "/index_maps.html" },
     { "source": "/wizard/myrooms", "destination": "/wizard_myrooms.html" },
     { "source": "/myrooms", "destination": "/myrooms.html" },
-    { "source": "/painel", "destination": "/painel.html" }
+    { "source": "/painel", "destination": "/painel.html" },
+    { "source": "/disponibilidade", "destination": "/disponibilidade.html" }    
   ],
   "headers": [
     {

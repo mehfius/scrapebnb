@@ -11,24 +11,18 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-white">
 
     <div class="flex items-center justify-center min-h-screen">
-        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-md">
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-none">
             
-            <!-- Cabeçalho com informações do usuário -->
             <div id="user-profile" class="text-center">
-                <img id="user-avatar" class="w-24 h-24 mx-auto rounded-full border-4 border-gray-200 shadow-lg" src="" alt="User Avatar">
+                <img id="user-avatar" class="w-24 h-24 mx-auto rounded-full shadow-lg" src="" alt="User Avatar">
                 <h2 id="user-name" class="mt-4 text-2xl font-bold text-gray-800">Carregando...</h2>
                 <p id="user-email" class="mt-1 text-sm text-gray-500">...</p>
             </div>
 
-            <!-- Menu de Navegação -->
             <div id="menu-options" class="space-y-3">
-<!--                 <a href="/map" class="flex items-center justify-center w-full px-4 py-3 text-base font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                    <i class="material-icons mr-3">map</i>
-                    <span>Ver Mapa</span>
-                </a> -->
                 <a href="/myrooms" class="flex items-center justify-center w-full px-4 py-3 text-base font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                     <i class="material-icons mr-3">hotel</i>
                     <span>Minha Hospedagem</span>
@@ -39,7 +33,6 @@
                 </a>
             </div>
 
-            <!-- Botão de Logout -->
             <div>
                 <button id="logout-button" class="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 transition-colors">
                     <i class="material-icons mr-2">logout</i>
@@ -53,9 +46,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase_auth_airbnb.js"></script>
     <script>
-
         document.addEventListener('DOMContentLoaded', () => {
-            // Adiciona o listener para o botão de logout
             const logoutButton = document.getElementById('logout-button');
             if (logoutButton) {
                 logoutButton.addEventListener('click', () => {
@@ -63,11 +54,9 @@
                 });
             }
 
-            // Popula as informações do usuário
             const populateUserInfo = async () => {
                 const { data, error } = await supabase.auth.getUser();
                 if (error || !data?.user) {
-                    // Se der erro ou não tiver usuário, o listener principal vai redirecionar
                     console.log("Usuário não encontrado, redirecionando para login...");
                     return;
                 }
